@@ -1,0 +1,24 @@
+FHIR-MLM-LOINC-Normalization
+Copyright 2026 Fenglin (Grace) Chen
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+LOINC
+This material contains content from LOINC (http://loinc.org). LOINC is copyright © Regenstrief
+Institute, Inc. and the Logical Observation Identifiers Names and Codes (LOINC) Committee and is
+available at no cost under the license at http://loinc.org/license. LOINC® is a registered United
+States trademark of Regenstrief Institute, Inc.
+
+FHIR-MLM
+The code uses the FHIR-MLM tokenizer, data collator, and model code written by Trevor Yu (University
+of Waterloo). They are not included in this repository.
+
+fhirclient
+The code depends on fhirclient 4.1.0 from SMART on FHIR (Copyright 2015 Boston Children's Hospital),
+which is licensed under the Apache License, Version 2.0. At run time, common/fhirclient_patch.py
+changes one element definition in the installed package, so that
+MedicationRequest.medicationCodeableConcept accepts a list, as MIMIC-IV on FHIR writes it.
+
+MIMIC-IV
+The code processes MIMIC-IV and MIMIC-IV on FHIR, which are distributed by PhysioNet under the
+PhysioNet Credentialed Health Data License. No MIMIC-IV data is included.

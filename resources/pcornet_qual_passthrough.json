@@ -1,0 +1,137 @@
+{
+  "_meta": {
+    "purpose": "Qualitative result strings that the TF-IDF inputs keep as written (after lowercasing and punctuation cleanup) when no PCORnet category applies and the string cannot identify a lab code. Hand-edited.",
+    "inclusion_rule": "A string is kept if it has no PCORnet category and either (a) appears under more than 5 distinct LOINC codes in MIMIC-IV, so it cannot identify a code, or (b) is numeric in form (matches one of the patterns below). Other strings without a category are dropped from the inputs, in training and testing alike. The MIMIC-IV counts behind (a) are not included."
+  },
+  "literals": {
+    "unable to report": {
+      "category": "status_nonresult",
+      "rationale": "generic status appears across 96 LOINCs"
+    },
+    "d": {
+      "category": "ambiguous_short",
+      "rationale": "single-letter ambiguous token across 106 LOINCs"
+    },
+    "nd not done wbc <=0 1": {
+      "category": "status_nonresult",
+      "rationale": "multi-LOINC non-result annotation; embedded numeric is part of the annotation"
+    },
+    "not done": {
+      "category": "status_nonresult",
+      "rationale": "generic non-result across 13 LOINCs"
+    },
+    "unable to report clotted": {
+      "category": "status_nonresult",
+      "rationale": "generic status with sample-clot reason, 19 LOINCs"
+    },
+    "error": {
+      "category": "status_nonresult",
+      "rationale": "generic error indicator across 28 LOINCs"
+    },
+    "unable to report specimen clotted": {
+      "category": "status_nonresult",
+      "rationale": "generic status with specimen-clot reason, 21 LOINCs"
+    },
+    "unable to perform": {
+      "category": "status_nonresult",
+      "rationale": "generic non-result across 20 LOINCs"
+    },
+    "unable to result": {
+      "category": "status_nonresult",
+      "rationale": "generic non-result across 18 LOINCs"
+    },
+    "unable to report specimen qns": {
+      "category": "status_nonresult",
+      "rationale": "generic status with quantity-not-sufficient reason, 13 LOINCs"
+    },
+    "unable to report qns": {
+      "category": "status_nonresult",
+      "rationale": "generic status with QNS reason, 13 LOINCs"
+    },
+    "unable unable to perform test": {
+      "category": "status_nonresult",
+      "rationale": "garbled generic non-result, 12 LOINCs"
+    },
+    "error disregard previous result of neg": {
+      "category": "result_amendment",
+      "rationale": "result-amendment note across 11 LOINCs"
+    },
+    "n": {
+      "category": "ambiguous_short",
+      "rationale": "single-letter ambiguous token across 38 LOINCs"
+    },
+    "-": {
+      "category": "ambiguous_short",
+      "rationale": "single-punctuation ambiguous token across 17 LOINCs"
+    },
+    "uanble to report": {
+      "category": "status_nonresult",
+      "rationale": "typo of 'unable to report', 6 LOINCs"
+    },
+    "error disregard previous result of 0": {
+      "category": "result_amendment",
+      "rationale": "result-amendment note across 9 LOINCs"
+    },
+    "verified": {
+      "category": "status_nonresult",
+      "rationale": "method/verification annotation, 16 LOINCs"
+    },
+    "a": {
+      "category": "ambiguous_short",
+      "rationale": "single-letter ambiguous token across 6 LOINCs"
+    },
+    "sone": {
+      "category": "ambiguous_short",
+      "rationale": "likely typo of 'some', 11 LOINCs"
+    },
+    "hemolysis falsely increases this result": {
+      "category": "sample_quality",
+      "rationale": "generic sample-quality note across 7 LOINCs"
+    }
+  },
+  "numeric_patterns": {
+    "threshold": {
+      "regex": "^[<>]=?\\d+(?: \\d+)?(?: /\\w+)?$",
+      "description": "Numeric threshold at detection-limit: '<1', '>182', '<0 2', '>1 050'. Digit groups separated by space are the preprocessed form of decimal points.",
+      "examples": [
+        "<1",
+        ">182",
+        "<0 2",
+        "<5",
+        ">1 050"
+      ]
+    },
+    "range_int": {
+      "regex": "^\\d+-\\d+$",
+      "description": "Integer-integer range used for ordinal count bands: '0-2', '3-5', '6-10'.",
+      "examples": [
+        "0-2",
+        "3-5",
+        "6-10",
+        "11-20",
+        "21-50"
+      ]
+    },
+    "text_threshold": {
+      "regex": "^(?:less|greater) than \\d+(?: \\d+)?(?: [a-z]+(?:/[a-z]+)?)?$",
+      "description": "English-prose threshold with optional single unit suffix: 'less than 10', 'greater than 20 ng/ml', 'less than 1 0'. Longer trailing text like 'verified by replicate analysis' is NOT matched — those strings are routed to paraphrase.",
+      "examples": [
+        "less than 10",
+        "greater than 20 ng/ml",
+        "greater than 2000",
+        "less than 1 0"
+      ]
+    },
+    "slash_fraction": {
+      "regex": "^\\d+/\\d*$|^/\\d+$",
+      "description": "Slash fractions (ventilation rate at LOINC 76526-3, Vent rate by CO2 meas) and their partial-fragment variants: '20/20', '16/0', '16/', '/20'. Source data at this LOINC records the two halves independently and sometimes truncates to one.",
+      "examples": [
+        "20/20",
+        "16/0",
+        "16/",
+        "/20",
+        "14/2"
+      ]
+    }
+  }
+}

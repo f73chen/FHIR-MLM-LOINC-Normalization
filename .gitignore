@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.env
+
+# Data, model outputs and weights never enter this repository (MIMIC-IV data use agreement).
+data/
+results/
+work/
+analysis/lib/fonts_cm/
+runs/
+checkpoints/
+*.csv
+*.tsv
+*.json
+*.jsonl
+*.ndjson
+*.parquet
+*.arrow
+*.pkl
+*.pickle
+*.joblib
+*.npy
+*.npz
+*.pt
+*.bin
+*.safetensors
+*.rda
+*.pdf
+*.zip
+*.gz
+
+# The small public resources that do ship.
+!resources/**
+resources/**/__pycache__/

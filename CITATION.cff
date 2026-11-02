@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the thesis it accompanies."
+title: "FHIR-MLM-LOINC-Normalization"
+type: software
+authors:
+  - family-names: Chen
+    given-names: Fenglin
+    alias: Grace Chen
+    affiliation: University of Waterloo
+license: Apache-2.0
+repository-code: "https://github.com/f73chen/FHIR-MLM-LOINC-Normalization"
+preferred-citation:
+  type: thesis
+  title: "Mapping Local Laboratory Codes to LOINC Using FHIR Patient Records"
+  authors:
+    - family-names: Chen
+      given-names: Fenglin
+  institution:
+    name: University of Waterloo
+    city: Waterloo
+    country: CA
+  department: "Systems Design Engineering"
+  year: 2026
+  thesis-type: "Master of Applied Science thesis"

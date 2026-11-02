@@ -1,0 +1,88 @@
+analyte,clia_limit,pct,abs,abs_unit,shape,clia_subspecialty
+Alanine aminotransferase (ALT/SGPT),TV ± 15% or ± 6 U/L (greater),15.0,6.0,U/L,hybrid,Routine Chemistry
+Albumin,TV ± 8%,8.0,,,relative,Routine Chemistry
+Alkaline Phosphatase,TV ± 20%,20.0,,,relative,Routine Chemistry
+Amylase,TV ± 20%,20.0,,,relative,Routine Chemistry
+AST,TV ± 15% or ± 6 U/L (greater),15.0,6.0,U/L,hybrid,Routine Chemistry
+"Bilirubin, total",TV ± 20% or 0.4 mg/dL (greater),20,0.4,mg/dL,hybrid,Routine Chemistry
+Blood gas pCO2,TV ± 5 mm Hg or ± 8% (greater),8,5,mm Hg,hybrid,Routine Chemistry
+Blood gas pO2,TV ± 15 mm Hg or ± 15% (greater),15,15,mm Hg,hybrid,Routine Chemistry
+Blood gas pH,TV ± 0.04,,0.04,pH,absolute,Routine Chemistry
+B-natriuretic peptide (BNP),TV ± 30%,30.0,,,relative,Routine Chemistry
+Pro B-natriuetic peptide (proBNP),TV ± 30%,30.0,,,relative,Routine Chemistry
+"Calcium, total",TV ± 1.0 mg/dL,,1.0,mg/dL,absolute,Routine Chemistry
+Carbon dioxide,TV ± 20%,20.0,,,relative,Routine Chemistry
+Chloride,TV ± 5%,5.0,,,relative,Routine Chemistry
+"Cholesterol, total",TV ± 10%,10.0,,,relative,Routine Chemistry
+"Cholesterol, high density liprotein",TV ± 20% TV or ± 6 mg/dL (greater),20.0,6.0,mg/dL,hybrid,Routine Chemistry
+Creatine kinase (CK),TV ± 20%,20.0,,,relative,Routine Chemistry
+Creatinine,TV ± 0.2 mg/dL or ± 10% (greater),10.0,0.2,mg/dL,hybrid,Routine Chemistry
+Ferritin,TV ± 20%,20.0,,,relative,Routine Chemistry
+Gamma glutamyl transferase,TV ± 5 U/L or ±15% (greater),15.0,5.0,U/L,hybrid,Routine Chemistry
+Glucose (excluding FDA home use),TV ± 6 mg/dL or ± 8% (greater),8.0,6.0,mg/dL,hybrid,Routine Chemistry
+Hemoglobin A1c,TV ± 8%,8.0,,,relative,Routine Chemistry
+"Iron, total",TV ± 15%,15.0,,,relative,Routine Chemistry
+Lactate dehydrogenase (LDH),TV ± 15%,15.0,,,relative,Routine Chemistry
+Magnesium,TV ± 15%,15.0,,,relative,Routine Chemistry
+Phosphorus,TV ± 0.3 mg/dL or 10% (greater),10,0.3,mg/dL,hybrid,Routine Chemistry
+Potassium,TV ± 0.3 mmol/L,,0.3,mmol/L,absolute,Routine Chemistry
+"Prostate Specific Antigen, total",TV ± 0.2 ng/mL or 20% (greater),20,0.2,ng/mL,hybrid,Routine Chemistry
+Sodium,TV ± 4 mmol/L,,4.0,mmol/L,absolute,Routine Chemistry
+Total Iron Binding Capacity (direct),TV ± 20%,20.0,,,relative,Routine Chemistry
+Total Protein,TV ± 8%,8.0,,,relative,Routine Chemistry
+Triglycerides,TV ± 15%,15.0,,,relative,Routine Chemistry
+Troponin I,TV ± 0.9 ng/mL or 30% (greater),30,0.9,ng/mL,hybrid,Routine Chemistry
+Troponin T,TV ± 0.2 ng/mL or 30% (greater),30,0.2,ng/mL,hybrid,Routine Chemistry
+Urea Nitrogen,TV ± 2 mg/dL or ± 9% (greater),9.0,2.0,mg/dL,hybrid,Routine Chemistry
+Uric Acid,TV ± 10%,10.0,,,relative,Routine Chemistry
+Alpha-1 antitrypsin,TV ± 20% or positive or negative,,,,other,Immunology
+Alpha-fetoprotein (tumor marker),TV ± 20% or positive or negative,,,,other,Immunology
+Antinuclear antibody,TV ± 2 dilutions or pos or neg,,,,other,Immunology
+Antistreptolysin O,TV ± 2 dilutions or pos or neg,,,,other,Immunology
+Complement C3,TV ± 15%,15.0,,,relative,Immunology
+Complement C4,TV ± 5 mg/dL or ± 20% (greater),20.0,5.0,mg/dL,hybrid,Immunology
+C-reactive protein (HS),TV ± 1 mg/L or ± 30% (greater),30,1,mg/L,hybrid,Immunology
+IgA,TV ± 20%,20.0,,,relative,Immunology
+IgE,TV ± 20%,20.0,,,relative,Immunology
+IgG,TV ± 20%,20.0,,,relative,Immunology
+IgM,TV ± 20%,20.0,,,relative,Immunology
+Infectious mononucleosis,TV ± 2 dilutions or pos or neg,,,,other,Immunology
+Rhematoid factor,TV ± 2 dilutions or pos or neg,,,,other,Immunology
+Cancer antigen (CA) 125,TV ± 20%,20.0,,,relative,Endocrinology
+Cortisol,TV ± 20%,20.0,,,relative,Endocrinology
+Estradiol,TV ± 30%,30.0,,,relative,Endocrinology
+"Folate, serum",TV ± 1 ng/mL or ± 30% (greater),30.0,1.0,ng/mL,hybrid,Endocrinology
+Follicle stimulating hormone,TV ± 2 IU/L or ± 18% (greater),18.0,2.0,IU/L,hybrid,Endocrinology
+Free throxine,TV ± 0.3 ng/dL or ± 15% (greater) TV ± 3SD,15,0.3,ng/dL,hybrid,Endocrinology
+Human chorionic gonadotropin,TV ± 3SD or positive or negative,,,,other,Endocrinology
+Luteinizing hormone,TV ± 20%,20.0,,,relative,Endocrinology
+Parathyroid hormone,TV ± 30%,30.0,,,relative,Endocrinology
+Progesterone,TV ± 25%,25.0,,,relative,Endocrinology
+Prolactin,TV ± 20%,20.0,,,relative,Endocrinology
+Testosterone,TV ± 20 ng/dL or ±30% (greater),30,20,ng/dL,hybrid,Endocrinology
+T3 uptake,TV ± 18%,18.0,,,relative,Endocrinology
+Triiodothyronine,TV ± 30%,30.0,,,relative,Endocrinology
+Thyroid stimulating hormone,TV ± 20% or ± 0.2 mIU/L (greater) TV ± 3SD,20,0.2,mIU/L,hybrid,Endocrinology
+Thyroxine,TV ± 20% or ± 1.0 mcg/dL (greater) Same,20.0,1.0,mcg/dL,hybrid,Endocrinology
+Vitamin B12,TV ± 25% or ± 30 pg/mL (greater) TV ± 30%,25,30,pg/mL,hybrid,Endocrinology
+Acetaminophen,TV ± 15% or or ± 3 mcg/mL (greater) None,15,3,mcg/mL,hybrid,Toxicology
+"Alcohol, blood",TV ± 20%,20.0,,,relative,Toxicology
+Blood lead,TV ± 10% or 2mcg/dL (greater),10,2,mcg/dL,hybrid,Toxicology
+Carbamazepine,TV ± 20% or ± 1.0 mcg/mL (greater) TV ± 25%,20,1,mcg/mL,hybrid,Toxicology
+Digoxin,TV ± 15% or ± 0.2 ng/mL (greater),15.0,0.2,ng/mL,hybrid,Toxicology
+Gentamicin,TV ± 25%,25.0,,,relative,Toxicology
+Lithium,TV ± 15% or ± 0.3 mmol/L (greater) TV ± 0.3 mmol/L or 20% (greater),15.0,0.3,mmol/L,hybrid,Toxicology
+Phenobarbital,TV ± 15% or ± 2 mcg/mL (greater),15,2,mcg/mL,hybrid,Toxicology
+Phenytoin,TV ± 15% or ± 2 mcg/mL (greater),15,2,mcg/mL,hybrid,Toxicology
+Salicylate,TV ± 15% or ± 2 mcg/mL (greater),15,2,mcg/mL,hybrid,Toxicology
+Theophylline,TV ± 20%,20.0,,,relative,Toxicology
+Tobramycin,TV ± 20%,20.0,,,relative,Toxicology
+Valproic acid,TV ± 20%,20.0,,,relative,Toxicology
+Vancomycin,TV ± 15% or ± 2 mcg/mL (greater),15,2,mcg/mL,hybrid,Toxicology
+Erythrocyte count,TV ± 4%,4.0,,,relative,Hematology
+Hematocrit,TV ± 4%,4.0,,,relative,Hematology
+Hemoglobin,TV ± 4%,4.0,,,relative,Hematology
+Leukocyte count,TV ± 10%,10.0,,,relative,Hematology
+Platelet count,TV ± 25%,25.0,,,relative,Hematology
+Fibrinogen,TV ± 20%,20.0,,,relative,Hematology
+Prothrombin time,TV ± 15%,15.0,,,relative,Hematology

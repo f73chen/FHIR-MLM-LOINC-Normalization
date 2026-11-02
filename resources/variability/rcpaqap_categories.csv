@@ -1,0 +1,275 @@
+category,analyte,limit
+Alcohol / Ammonia,Alcohol,+ or - 2.0 20.0mmol/L + or - 10% > 20.0 mmol/L Prof. Opinion
+Alcohol / Ammonia,Ammonia,+ or - 5 50 umol/L/L + or - 10% > 50 umol/L/L Prof. Opinion
+Anti-Fungals,Itraconazole,+ or - 0.1 1.0 mg/L + or - 10% > 1.0 mg/L Prof. Opinion
+Anti-Fungals,Fluconazole,+ or - 2.0 20.0 mg/L + or - 10% > 20.0 mg/L Prof. Opinion
+Anti-Fungals,Hydroxyitraconazole,+ or - 0.2 2.0 mg/L + or - 10% > 2.0 mg/L Prof. Opinion
+Anti-Fungals,Posaconazole,+ or - 0.1 1.0 mg/L + or - 10% > 1.0 mg/L Prof. Opinion
+Anti-Fungals,Voriconazole,+ or - 0.2 2.0 mg/L + or - 10% > 2.0 mg/L Prof. Opinion
+Anti-Fungals,Flucytosine,+ or - 10 100 mg/L + or - 10% > 100 mg/L Prof. Opinion
+Antibiotics,Amikacin,+ or - 2.0 19.9 mg/L + or - 10% > 19.9 mg/L Prof. Opinion
+Antibiotics,Gentamicin,+ or - 0.2 2.0 mg/L + or - 10% > 2.0 mg/L Prof. Opinion
+Antibiotics,Tobramycin,+ or - 0.2 2.0 mg/L + or - 10% > 2.0 mg/L Prof. Opinion
+Antibiotics,Vancomycin,+ or - 2.0 20.3 mg/L + or - 10% > 20.3 mg/L Prof. Opinion
+Bile Acids,Total Bile Acids,+ or - 4 40 umol/L + or - 10% > 40 umol/L Prof. Opinion
+Biogenic Amines,Adrenaline,+ or - 30 100 nmol/L + or - 30% > 100 nmol/L Total Error Optimal
+Biogenic Amines,Dopamine,+ or - 0.20 2.0 µmol/L + or - 10% > 2.0 µmol/L Imprecision Optimal
+Biogenic Amines,5HIAA,+ or - 8 40 µmol/L + or - 20% > 40 µmol/L Imprecision Desirable
+Biogenic Amines,HMMA,+ or - 6 40 µmol/L + or - 15% > 40 µmol/L Total Error Optimal
+Biogenic Amines,HVA,+ or - 6 40 µmol/L + or - 15% > 40 µmol/L Imprecision Desirable
+Biogenic Amines,Metanephrine,+ or - 0.2 1.0 µmol/L + or - 20% > 1.0 µmol/L Total Error Optimal
+Biogenic Amines,Noradrenaline,+ or - 75 500 nmol/L + or - 15% > 500 nmol/L Total Error Optimal
+Biogenic Amines,Normetanephrine,+ or - 0.4 2.0 µmol/L + or - 20% > 2.0 µmol/L Total Error Optimal
+Biogenic Amines,3-Methoxytyramine,+ or - 0.3 2.0 µmol/L + or - 15% > 2.0 µmol/L Total Error Optimal
+Biogenic Amines,Serotonin,+ or - 0.2 1.0 µmol/L + or - 20% > 1.0 µmol/L Prof. Opinion
+Blood Gases,Chloride,+ or - 3 100 mmol/L + or - 3% > 100 mmol/L Total Error Minimal
+Blood Gases,Glucose,+ or - 0.4 5.0 mmol/L + or - 8% > 5.0 mmol/L Imprecision Desirable
+Blood Gases,Ionised Calcium,+ or - 0.04 1.00 mmol/L + or - 4% >1.00 mmol/L Total Error Minimal
+Blood Gases,Lactate,+ or - 0.5 4.0 mmol/L + or - 12% > 4.0 mmol/L Imprecision Optimal
+Blood Gases,pH,+ or - 0.04 + or - 0.04 Prof. Opinion
+Blood Gases,pCO2,+ or - 2.0 34.0 mm Hg + or - 6% > 34.0 mm Hg Total Error Desirable
+Blood Gases,pO2,+/- 5 to 83 mm Hg + or - 6% > 83 mm Hg Prof. Opinion Desirable
+Blood Gases,Potassium,+ or - 0.2 4.0 mmol/L + or - 5% > 4.0 mmol/L Imprecision Desirable
+Blood Gases,Sodium,+ or - 3 150 mmol/L + or - 2% > 150 mmol/L Total Error Minimal
+Blood Gases,Urea,+ or - 0.5 4.0 mmol/L + or - 12% > 4.0 mmol/L Imprecision Desirable
+Blood Gases,Creatinine,+ or - 8.0 100.0 µmol/L + or - 8% > 100.0 µmol/L Imprecision Minimal
+BNP,NT-Pro-BNP,+ or - 25 125 ng/L + or - 20% > 125 ng/L Total Error Optimal
+BNP,BNP,+ or - 20 100 ng/L + or - 20% > 100 ng/L Prof. Opinion
+Body Fluids,Albumin,+ or - 2.0 33.0 g/L + or - 6% > 33.0 g/L
+Body Fluids,Amylase,+ or - 20 100 U/L + or - 20% > 100 U/L
+Body Fluids,Cholesterol,+ or - 0.3 2.5 mmol/L + or - 12% > 2.5 mmol/L
+Body Fluids,Creatinine,+ or - 16 100 umol/L + or - 16% > 100 umol/L
+Body Fluids,Glucose,+ or - 0.4 5.0 mmol/L + or - 8% > 5.0 mmol/L
+Body Fluids,Lactate,+ or - 1.0 4.0 mmol/L + or - 25% > 4.0 mmol/L
+Body Fluids,Lactate Dehydrogenase (L->P),+ or - 20 250 U/L + or - 8% > 250 U/L
+Body Fluids,Lipase,+ or - 24 60 U/L + or - 40% > 60 U/L
+Body Fluids,Osmolality,+ or - 8 266 mmol/kg + or - 3% > 266 mmol/kg
+Body Fluids,pH,+ or - 0.2 + or - 0.2
+Body Fluids,Potassium,+ or - 0.4 4.0 mmol/L + or - 10% > 4.0 mmol/L
+Body Fluids,Protein,+ or - 3.0 60.0 g/L + or - 5% > 60.0 g/L
+Body Fluids,Sodium,+ or - 6 150 mmol/L + or - 4% > 150 mmol/L
+Body Fluids,Triglycerides,+ or - 0.3 1.2 mmol/L + or - 25% > 1.2 mmol/L
+Body Fluids,Urate,+ or - 0.060 0.380 mmol/L + or - 16% > 0.380 mmol/L
+Body Fluids,Urea,+ or - 1.0 4.0 mmol/L + or - 24% > 4.0 mmol/L
+Body Fluids,CA 19-9,+ or - 12 40 kU/L + or - 30% > 40 kU/L
+Body Fluids,CEA,+ or - 1.2 5.0 ug/L + or - 24% > 5.0 ug/L
+Co-Oximetry,Haemoglobin Concentration,+ or - 5 100 g/L + or - 5% > 100 g/L Total Error Desirable
+Co-Oximetry,Fractional Oxyhaemoglobin,+ or - 3 75.0% + or - 4% > 75.0% Prof. Opinion
+Co-Oximetry,Fractional Carboxyhaemoglobin,+ or - 1.0 5.0% + or - 20% > 5.0% Prof. Opinion
+Co-Oximetry,Fractional Methaemoglobin,+ or - 2.0 20% + or - 10% > 20% Prof. Opinion
+CRP,CRP,+ or - 0.8 4.0 mg/L + or - 20% > 4.0 mg/L
+CSF,Albumin,+ or - 0.02 0.1 g/L + or - 20% > 0.1 g/L Prof. Opinion
+CSF,Glucose,+ or - 0.2 2.0 mmol/L + or - 10% > 2.0 mmol/L Prof. Opinion
+CSF,Immunoglobulin G,+ or - 0.02 0.10 g/L + or - 20% > 0.10 g/L Prof. Opinion
+CSF,Lactate,+ or - 0.3 3.0 mmol/L + or - 10% > 3.0 mmol/L Prof. Opinion
+CSF,Total Protein,+ or - 0.05 0.50 g/L + or - 10% > 0.50 g/L Prof. Opinion
+CSF,Bilirubin Concentration,+ or - 0.12 0.60 µmol/L + or - 20% > 0.60 µmol/L Prof. Opinion
+Endocrine,AFP,+ or - 2 17 kIU/L + or -12% > 17 kIU/L Imprecision Desirable
+Endocrine,Aldosterone,+ or - 24 160 pmol/L + or - 15% > 160 pmol/L Imprecision Optimal
+Endocrine,Androstenedione,+ or - 1.5 10 nmol/L + or - 15% > 10 nmol/L Total Error Optimal
+Endocrine,CA125,+ or - 6 50 kU/L + or - 12% > 50 kU/L Imprecision Optimal
+Endocrine,CEA,+ or - 0.6 5.0 µg/L + or - 12% > 5.0 µg/L Imprecision Desirable
+Endocrine,Cortisol,+ or - 15 100 nmol/L + or - 15% > 100 nmol/L Imprecision Optimal
+Endocrine,DHEA Sulphate,+ or - 1.2 10.0 µmol/L + or - 12% > 10.0 µmol/L Total Error Desirable
+Endocrine,Ferritin,+ or - 4.0 27.0 µg/L + or - 15% > 27.0 µg/L Imprecision Desirable
+Endocrine,Folate,+ or - 1.5 6.0 nmol/L + or - 25% > 6.0 nmol/L Imprecision Desirable
+Endocrine,FSH,+ or - 1.0 10.0 IU/L + or - 10% > 10.0 IU/L Imprecision Desirable
+Endocrine,Growth Hormone,+ or - 1 7 mU/L + or - 15% > 7 mU/L Imprecision Optimal
+Endocrine,hCG,+ or - 1 10 IU/L + or - 10% > 10 IU/L Prof. Opinion
+Endocrine,Homocysteine,+ or - 1.5 15.0 µmol/L + or - 10% > 15.0 µmol/L Total Error Optimal
+Endocrine,17-Hydroxyprogesterone,+ or - 2.0 10.0 nmol/L + or - 20% > 10.0 nmol/L Total Error Optimal
+Endocrine,Insulin,+ or - 0.6 5.0 mU/L + or - 12% > 5.0 mU/L Imprecision Optimal
+Endocrine,LH,+ or - 1.5 10.0 IU/L + or - 15% > 10.0 IU/L Imprecision Desirable
+Endocrine,Oestradiol,+ or - 25 100 pmol/Ll + or - 25% > 100 pmol/L Total Error Desirable
+Endocrine,Oestriol(Unconjugated),+ or - 0.9 6.0 nmol/L + or - 15% > 6.0 nmol/L Prof. Opinion
+Endocrine,PTH,+ or - 1.0 8.0 pmol/L + or - 12% > 8.0 pmol/L Imprecision Optimal
+Endocrine,Progesterone,+ or - 2 10 nmol/L + or - 15% > 10 nmol/L Imprecision Optimal
+Endocrine,Prolactin,+ or - 40 400 mIU/L + or - 10% > 400 mIU/L Imprecision Minimal
+Endocrine,SHBG,+ or - 6 50 nmol/L + or - 12% > 50 nmol/L Imprecision Desirable
+Endocrine,Testosterone,+ or - 0.4 2.7 nmol/L + or - 15% > 2.7 nmol/L Imprecision Minimal
+Endocrine,TSH,+ or - 0.10 0.50 mU/L + or - 20% > 0.50 mU/L Imprecision Desirable
+Endocrine,Free T3,+ or - 0.7 3.5 pmol/L + or - 20% > 3.5 pmol/L Total Error Desirable
+Endocrine,Free T4,+ or - 1.5 12 pmol/L + or - 12% > 12 pmol/L Total Error Desirable
+Endocrine,Total T3,+ or - 0.2 1.3 nmol/L + or - 15% > 1.3 nmol/L Total Error Desirable
+Endocrine,Total Thyroxine,+ or - 12 120 nmol/L + or - 10% > 120 nmol/L Total Error Desirable
+Endocrine,Vitamin B12,+ or - 18 120 pmol/L + or - 15% > 120 pmol/L Imprecision Desirable
+Endocrine,Vitamin D3,+ or - 9 60 nmol/L + or - 15 % 60 nmol/L Imprecision Minimal
+Endocrine,Total PSA,+ or - 0.4 5.0 µg/L + or - 8% > 5.0 µg/L Imprecision Optimal
+Endocrine,Free PSA,+ or - 0.2 1.4 µg/L + or - 15% > 1.4 µg/L Imprecision Optimal
+Endocrine,ACE,+ or - 1.0 10.0 U/L + or - 10% > 10.0 U/L Prof. Opinion
+Endocrine,Red Cell Folate,+ or - 80 400 nmol/L + or - 20% > 400 nmol/L Imprecision Minimal
+Faecal Occult Blood,Quantitative,+ or - 15 100 ng/mL + or - 15% >100 ng/mL
+General Serum Chemistry,Albumin,+ or - 2.0 33.0 g/L + or - 6% > 33.0 g/L Total Error Desirable
+General Serum Chemistry,Alkaline Phosphatase,+ or - 15 125 U/L + or - 12% > 125 U/L Total Error Desirable
+General Serum Chemistry,ALT,+ or - 5 40 U/L + or - 12% > 40 U/L Imprecision Optimal
+General Serum Chemistry,Amylase,+ or - 10 100 U/L + or - 10% > 100 U/L Imprecision Desirable
+General Serum Chemistry,AST,+ or - 5 40 U/L + or - 12% > 40 U/L Imprecision Desirable
+General Serum Chemistry,Bicarbonate,+ or - 2.0 20.0 mmol/L + or - 10% > 20.0 mmol/L Total Error Minimal
+General Serum Chemistry,Bilirubin-Total,+ or - 3 25 µmol/L + or - 12% > 25 µmol/L Imprecision Optimal
+General Serum Chemistry,Bilirubin Conjugated,+ or - 3 15 µmol/L + or - 20% > 15 µmol/L Imprecision Optimal
+General Serum Chemistry,Calcium,+ or - 0.10 2.50 mmol/L + or - 4% > 2.50 mmol/L Imprecision Minimal
+General Serum Chemistry,Chloride,+ or - 3 100 mmol/L + or - 3% > 100 mmol/L Total Error minimal
+General Serum Chemistry,Cholesterol,+ or - 0.30 5.00 mmol/L + or - 6% > 5.00 mmol/L Imprecision Desirable
+General Serum Chemistry,Cholinesterase,+ or - 500 5000 U/L + or - 10% > 5000 U/L Prof. Opinion
+General Serum Chemistry,Creatine Kinase,+ or - 15 125 U/L + or - 12% > 125 U/L Imprecision Optimal
+General Serum Chemistry,CK-MB,+ or - 3 15 U/L or µg/L + or - 20% > 15 U/L or µg/L Imprecision Desirable
+General Serum Chemistry,Cortisol,+ or - 15 100 nmol/L + or - 15% > 100 nmol/L Prof. Opinion
+General Serum Chemistry,Creatinine,+ or - 8.0 100.0 µmol/L + or - 8% > 100.0 µmol/L Imprecision Minimal
+General Serum Chemistry,Ferritin,+ or - 4.0 27 µg/L + or - 15% > 27 µg/L Imprecision Desirable
+General Serum Chemistry,Fructosamine,+ or - 15 250 µmol/L + or - 6% > 250 µmol/L Imprecision Minimal
+General Serum Chemistry,Glucose,+ or - 0.4 5.0 mmol/L + or - 8% > 5.0 mmol/L Imprecision Desirable
+General Serum Chemistry,GGT,+ or - 5 40 U/L + or - 12% > 40 U/L Imprecision Desirable
+General Serum Chemistry,hCG-quantitative,+ or - 1.0 10.0 IU/L + or - 10% > 10.0 IU/L Prof. Opinion
+General Serum Chemistry,HDL Cholesterol,+ or - 0.10 0.80 mmol/L + or - 12% > 0.80 mmol/L Imprecision Minimal
+General Serum Chemistry,Icterus (Quantitative),+ or - 6.0 25.0 µmol/L + or - 25% > 25.0 µmol/L
+General Serum Chemistry,Icterus (Numeric Index),+ or - 1 10 + or - 10% > 10
+General Serum Chemistry,Iron,+ or - 3.0 25.0 µmol/L + or - 12% > 25.0 µmol/L Imprecision Optimal
+General Serum Chemistry,Lactate Dehydrogenase,+ or - 20 250 U/L + or - 8% > 250 U/L Prof. Opinion
+General Serum Chemistry,Lactate,+ or - 0.5 4.0 mmol/L + or - 12% > 4.0 mmol/L Imprecision Optimal
+General Serum Chemistry,Lipase,+ or - 12 60 U/L + or - 20% > 60 U/L Imprecision Desirable
+General Serum Chemistry,Lithium,+ or - 0.20 2.0 mmol/L + or - 10% > 2.0 mmol/L Prof. Opinion
+General Serum Chemistry,Magnesium,+ or - 0.10 1.25 mmol/L + or - 8% > 1.25 mmol/L Total Error Minimal
+General Serum Chemistry,Osmolality,+ or - 8 266 mmol/kg + or - 3% > 266 mmol/kg Total Error Minimal
+General Serum Chemistry,Phosphate,+ or - 0.06 0.75 mmol/L + or - 8% > 0.75 mmol/L Imprecision Desirable
+General Serum Chemistry,Potassium,+ or - 0.2 4.0 mmol/L + or - 5% > 4.0 mmol/L Imprecision Desirable
+General Serum Chemistry,Protein (Total),+ or - 3 60 g/L + or - 5% >60 g/L Total Error Desirable
+General Serum Chemistry,Sodium,+ or - 3 150 mmol/L + or - 2% > 150 mmol/L Total Error Minimal
+General Serum Chemistry,Total T3,+ or - 0.2 1.3 nmol/L + or - 15% > 1.3 nmol/L Total Error Desirable
+General Serum Chemistry,Free T3,+ or - 0.7 3.5 pmol/L + or - 20% > 3.5 pmol/L Total Error Desirable
+General Serum Chemistry,Free T4,+ or - 1.5 12.0 pmol/L + or - 12% > 12.0 pmol/L Total Error Desirable
+General Serum Chemistry,TSH,+ or - 0.1 0.5 mU/L + or - 20% > 0.5 mU/L Imprecision Desirable
+General Serum Chemistry,Total T4,+ or - 12 120 nmol/L + or - 10% > 120 nmol/L Total Error Desirable
+General Serum Chemistry,TIBC,+ or - 4.0 50.0 µmol/L + or - 8% > 50.0 µmol/L Prof. Opinion
+General Serum Chemistry,Transferrin,+ or - 0.20 2.50 g/L + or - 8% > 2.50 g/L Total Error Minimal
+General Serum Chemistry,Triglyceride,+ or - 0.20 1.60 mmol/L + or - 12% > 1.60 mmol/L Imprecision Optimal
+General Serum Chemistry,Troponin I,+ or - 0.002 0.010 µg/L + or - 20% > 0.010 µg/L Prof. Opinion
+General Serum Chemistry,Troponin T,+ or - 0.01 0.050 µg/L + or - 20% > 0.050 µg/L Prof. Opinion
+General Serum Chemistry,Urate,+ or - 0.030 0.380 mmol/L + or - 8% > 0.380 mmol/L Imprecision Desirable
+General Serum Chemistry,Urea,+ or - 0.5 4.0 mmol/L + or - 12% > 4.0 mmol/L Imprecision Desirable
+General Therapeutic Drugs,Carbamazepine,+ or - 0.5 4.7 mg/L + or - 10% > 4.7 mg/L Prof. Opinion
+General Therapeutic Drugs,Digoxin,+ or - 0.2 1.6 µg/L + or - 10% > 1.6 µg/L Prof. Opinion
+General Therapeutic Drugs,Gentamicin,+ or - 0.2 2.0 mg/L + or - 10% > 2.0 mg/L Prof. Opinion
+General Therapeutic Drugs,Paracetamol,+ or - 3.0 30.0 mg/L + or - 10% > 30.0 mg/L Prof. Opinion
+General Therapeutic Drugs,Phenobarbitone,+ or - 0.7 7.0 mg/L + or - 10% > 7.0 mg/L Prof. Opinion
+General Therapeutic Drugs,Phenytoin,+ or - 0.8 7.6 mg/L + or - 10% > 7.6 mg/L Prof. Opinion
+General Therapeutic Drugs,Salicylate,+ or - 14.0 143.0 mg/L + or - 10% > 143.0 mg/L Prof. Opinion
+General Therapeutic Drugs,Theophylline,+ or - 0.5 5.4 mg/L + or - 10% > 5.4 mg/L Prof. Opinion
+General Therapeutic Drugs,Valproate,+ or - 4.0 36.0 mg/L + or - 10% > 36.0 mg/L Prof. Opinion
+General Therapeutic Drugs,Vancomycin,+ or - 2.0 20.3 mg/L + or - 10% > 20.3 mg/L Prof. Opinion
+Glycohaemoglobin,HbA1c (NGSP) (%),+ or - 0.4 6.7% + or - 6% > 6.7% Prof. Opinion
+Glycohaemoglobin,HbA1c (IFCC) (mmol/mol),+ or - 4 45 mmol/mol + or - 8% > 45 mmol/mol Prof. Opinion
+IGF-1 / C-Peptide,IGF-1,+ or - 3 25 nmol/L + or - 12% > 25 nmol/L Imprecision Minimal
+IGF-1 / C-Peptide,C Peptide,+ or - 0.15 1.25 nmol/L + or - 12% > 1.25 nmol/L Total Error Optimal
+IGF-1 / C-Peptide,IGFBP-3,+ or - 15.0 100 nmol/L + or - 15% > 100 nmol/L Prof. Opinion
+Immunosuppressants,Cyclosporin,+ or - 10 100 µg/L + or - 10% > 100 µg/L Prof. Opinion
+Immunosuppressants,Sirolimus,+ or - 0.5 5.0 µg/L + or - 10% > 5.0 µg/L Prof. Opinion
+Immunosuppressants,Tacrolimus,+ or - 0.5 5.0 µg/L + or - 10% > 5.0 µg/L Prof. Opinion
+Neonatal Bilirubin,Total Bilirubin,+ or - 8 80 µmol/L + or - 10% > 80 µmol/L Imprecision Optimal
+Neonatal Bilirubin,Conjugated Bilirubin,+ or - 3 15 µmol/L + or - 20% >15 µmol/L Imprecision Optimal
+Plasma Metanephrines,Metanephrine,+ or - 75 500 pmol/L + or - 15% > 500 pmol/L Total Error Optimal
+Plasma Metanephrines,Normetanephrine,+ or - 200 1000 pmol/L + or - 20% > 1000 pmol/L Total Error Optimal
+Plasma Metanephrines,Methyoxytyramine,+ or - 36 120 pmol/L + or - 30% > 120 pmol/L Total Error Desirable
+Point-of-care Troponin,Troponin I,+ or - 0.01 0.05 µg/L + or - 20% > 0.05 µg/L Prof. Opinion
+Point-of-care Troponin,Troponin T (Quantitative),+ or - 10 50 ng/L + or - 20% > 50 ng/L Prof. Opinion
+Point-of-care Troponin,hCG,+ or - 1 10 IU/L + or - 10% > 10 IU/L Prof. Opinion
+Point-of-care Blood Gases,pH,+ or - 0.04 + or - 0.04 Prof. Opinion
+Point-of-care Blood Gases,pCO2,+ or - 2.0 34.0 mm Hg + or - 6% > 34.0 mm Hg Total Error Desirable
+Point-of-care Blood Gases,pO2,+/- 5 to 83 mm Hg + or - 6% > 83 mm Hg Prof. Opinion Desirable
+Point-of-care Blood Gases,TCO2,+ or - 2.0 20.0 mmol/L + or - 10% > 20.0 mmol/L Prof. Opinion
+Point-of-care Blood Gases,Lactate,+ or - 0.5 4.0 mmol/L + or - 12% > 4.0 mmol/L Imprecision Optimal
+Point-of-care Blood Gases,Sodium,+ or - 3 150 mmol/L + or - 2% > 150 mmol/L Total Error Minimal
+Point-of-care Blood Gases,Potassium,+ or - 0.2 4.0 mmol/L + or - 5% > 4.0 mmol/L Imprecision Desirable
+Point-of-care Blood Gases,Chloride,+ or - 3 100 mmol/L + or - 3% > 100 µmol/L Total Error Minimal
+Point-of-care Blood Gases,Ionised Calcium,+ or - 0.04 1.00 mmol/L + or - 4% >1.00 mmol/L Total Error Minimal
+Point-of-care Blood Gases,Glucose,+ or - 0.4 5.0 mmol/L + or - 8% > 5.0 mmol/L Imprecision Desirable
+Point-of-care Blood Gases,Urea,+ or - 0.5 4.0 mmol/L + or - 12% > 4.0 mmol/L Imprecision Desirable
+Point-of-care Blood Gases,Creatinine,+ or - 8.0 100.0 µmol/L + or - 8% > 100.0 µmol/L Imprecision Minimal
+Point-of-care Blood Gases,Haematocrit,+ or - 4 20% + or - 20% >20% Prof. Opinion
+Point-of-care Blood Gases,Haemoglobin,+ or - 5 100 g/L + or - 5% > 100 g/L Prof. Opinion
+Porphyrins,Urine ALA,+ or - 8 32 µmol/L + or - 25% > 32 µmol/L Prof. Opinion
+Porphyrins,Urine Total Porphyrin,+ or - 60 300 nmol/L + or - 20% > 300 nmol/L Prof. Opinion Desirable
+Porphyrins,Faecal Percent Dry Weight,+ or - 2 20% + or - 10% > 20% Prof. Opinion
+Porphyrins,Faecal Total Porphyrin,+ or - 40 200 µmol/kg + or - 20% > 200 µmol/kg Prof. Opinion Optimal
+Porphyrins,Plasma Total Porphyrin,+ or - 4 20 nmol/L + or - 20% > 20 nmol/L Prof. Opinion Minimal
+Porphyrins,RBC Total Porphyrin,+ or - 0.4 2.0 µmol/Lrc + or - 20% > 2.0 µmol/Lrc Prof. Opinion
+Serum Indices,Haemolysis (Quantitative),+ or - 8 80 mg/dL + or - 10% > 80 mg/dL
+Serum Indices,Haemolysis (Numeric Index),+ or - 1 10 + or - 10% > 10
+Serum Indices,Icterus (Quantitative),+ or - 6.0 25.0 µmol/L + or - 25% > 25.0 µmol/L
+Serum Indices,Icterus (Numeric Index),+ or - 1 10 + or - 10% > 10
+Serum Indices,Lipaemia (Quantitative),+ or - 26 263 mg/dL + or - 10% > 263 mg/dL
+Serum Indices,Lipaemia (Numeric Index),+ or - 1 10 + or - 10% > 10
+Special Lipids,Cholesterol,+ or - 0.30 5.00 mmol/L + or - 6% > 5.00 mmol/L Prof. Opinion
+Special Lipids,HDL Cholesterol,+ or - 0.1 0.80 mmol/L + or - 12% > 0.80 mmol/L Prof. Opinion
+Special Lipids,LDL Cholesterol,+ or - 0.20 2.00 mmol/L + or - 10% > 2.00 mmol/L Prof. Opinion
+Special Lipids,Triglyceride,+ or - 0.20 1.60 mmol/L + or - 12% > 1.60 mmol/L Prof. Opinion
+Special Lipids,Apolipoprotein A1,+ or - 0.2 2.0 g/L + or - 10% > 2.0 g/L Prof. Opinion
+Special Lipids,Apolipoprotein B,+ or - 0.2 2.0 g/L + or - 10% > 2.0 g/L Prof. Opinion
+Special Lipids,Lipoprotein(a),+ or - 0.06 0.3 g/L + or - 20% > 0.3 g/L Imprecision Desirable
+Special Therapeutic Drugs,Amiodarone,+ or - 0.1 1.3 mg/L + or - 10% > 1.3 mg/L Prof. Opinion
+Special Therapeutic Drugs,Amitriptyline,+ or - 3.0 28.0 µg/L + or - 10% > 28.0 µg/L Prof. Opinion
+Special Therapeutic Drugs,Clozapine,+ or - 12 100 µg/L + or - 12% > 100 µg/L Prof. Opinion
+Special Therapeutic Drugs,Methotrexate,+ or - 0.10 1.00 µmol/L + or - 10% > 1.00 µmol/L Prof. Opinion
+Special Therapeutic Drugs,Mycophenolate,+ or - 0.10 1.00 mg/L + or - 10% > 1.00 mg/L Prof. Opinion
+Special Therapeutic Drugs,Nortriptyline,+ or - 3.0 26.0 µg/L + or - 10% > 26.0 µg/L Prof. Opinion
+Sweat Electrolytes,Chloride,+ or - 2 40 mmol/L + or - 5% > 40 mmol/L Imprecision
+Sweat Electrolytes,Sweat Conductivity,+ or - 2 50 mmol/L + or - 5% > 50 mmol/L UK Guidelines
+Trace Elements,Aluminium,+ or - 0.08 0.40 µmol/L + or - 20% > 0.40 µmol/L Prof. Opinion
+Trace Elements,Chromium,+ or - 3 25 nmol/L + or - 12% > 25 nmol/L Prof. Opinion
+Trace Elements,Cobalt,+ or - 1 10 nmol/L + or - 10% > 10 nmol/L Prof. Opinion
+Trace Elements,Copper,+ or - 1.6 20.0 µmol/L + or - 8% > 20.0 µmol/L Imprecision Minimal
+Trace Elements,Lithium,+ or - 0.2 2.0 mmol/L + or - 10% > 2.0 mmol/L Prof. Opinion
+Trace Elements,Magnesium,+ or - 0.1 1.25 nmol/L + or - 8% > 1.25 nmol/L Prof. Opinion
+Trace Elements,Selenium,+ or - 0.18 1.50 µmol/L + or - 12% > 1.50 µmol/L Imprecision Desirable
+Trace Elements,Thallium,+ or - 1 10 nmol/L + or - 10% > 10 nmol/L Prof. Opinion
+Trace Elements,Vanadium,+ or - 1 10 nmol/L + or - 10% > 10nmol/L Prof. Opinion
+Trace Elements,Zinc,+ or - 2.0 20.0 µmol/L + or - 10% > 20.0 µmol/L Imprecision Desirable
+Trace Elements,Arsenic (Total),+ or - 50 500 nmol/L + or - 10% > 500 nmol/L Prof. Opinion
+Trace Elements,Cadmium,+ or - 3 20 nmol/L + or - 15% > 20 nmol/L Prof. Opinion
+Trace Elements,Iodine,+ or - 80 800 nmol/L + or - 10% > 800 nmol/L Prof. Opinion
+Trace Elements,Iron,+ or - 3 25 µmol/L + or - 12% > 25 µmol/L Prof. Opinion
+Trace Elements,Lead,+ or - 50 500 nmol/L + or - 10% > 500 nmol/L Prof. Opinion
+Trace Elements,Manganese,+ or - 3 25 nmol/L + or - 12% > 25 nmol/L Prof. Opinion
+Trace Elements,Mercury,+ or - 9 60 nmol/L + or - 15% > 60 nmol/L Prof. Opinion
+Trace Elements,Nickel,+ or - 40 400 nmol/L + or - 10% > 400 nmol/L Prof. Opinion
+Tumour Markers,ACTH,+ or - 2.0 20 pmol/L + or - 10% > 20 pmol/L Prof. Opinion
+Tumour Markers,Alpha-fetoprotein,+ or - 2 17 kIU/L + or - 12% > 17 kIU/L Imprecision Desirable
+Tumour Markers,Calcitonin,+ or - 2 20 ng/L + or - 10% > 20 ng/L Prof. Opinion
+Tumour Markers,CEA,+ or - 0.6 5.0 µg/L + or - 12% > 5.0 µg/L Imprecision Desirable
+Tumour Markers,CA125,+ or - 6 50 kU/L + or - 12% > 50 kU/L Imprecision Optimal
+Tumour Markers,CA15-3,+ or - 3 30 kU/L + or - 10% > 30 kU/L Imprecision Minimal
+Tumour Markers,CA19-9,+ or - 6 40 kU/L + or - 15% > 40 kU/L Imprecision Desirable
+Tumour Markers,hCG,+ or - 1 10 IU/L + or - 10% > 10 IU/L Prof. Opinion
+Tumour Markers,Beta-2-Microglobulin,+ or - 0.2 2.0 mg/L + or - 10% > 2.0 mg/L Imprecision Minimal
+Tumour Markers,NSE,+ or - 2.0 20 µg/L + or - 10% > 20 µg/L Prof. Opinion
+Tumour Markers,Gastrin,+ or - 10 100 pmol/L + or - 10% > 100 pmol/L Prof. Opinion
+Tumour Markers,Prolactin,+ or - 40 400 mIU/L + or - 10% > 400 mIU/L Imprecision Minimal
+Tumour Markers,Total PSA,+ or - 0.4 5.0 µg/L + or - 8% > 5.0 µg/L Imprecision Optimal
+Tumour Markers,Thyroglobulin,+ or - 0.2 1.7 µg/L + or - 12% > 1.7 µg/L Imprecision Desirable
+Urine Chemistry,Albumin,+ or - 4.0 20.0 mg/L + or - 20% > 20.0 mg/L Prof. Opinion
+Urine Chemistry,Calcium,+ or - 0.20 2.0 mmol/L + or - 10% > 2.0 mmol/L Prof. Opinion
+Urine Chemistry,Chloride,+ or - 4 40 mmol/L + or - 10% > 40 mmol/L Prof. Opinion
+Urine Chemistry,Cortisol,+ or - 30 200nmol/L + or - 15% > 200 nmol/L Prof. Opinion Desirable
+Urine Chemistry,Creatinine,+ or - 0.5 5.0 mmol/L + or - 10% > 5.0 mmol/L Prof. Opinion
+Urine Chemistry,DPD (Free),+ or - 15 80 nmol/L + or - 15% > 80 nmol/L Prof. Opinion
+Urine Chemistry,Free 3-Methoxytyramine,+ or - 15 100 nmol/L + or - 15% > 100 nmol/L
+Urine Chemistry,Free Metanephrine,+ or - 30 100 nmol/L + or - 30% > 100 nmol/L
+Urine Chemistry,Free Normetanephrine,+ or - 40 200 nmol/L + or - 20% > 200 nmol/L
+Urine Chemistry,Glucose,+ or - 1.0 10.0 mmol/L + or - 10% > 10.0 mmol/L Prof. Opinion
+Urine Chemistry,hCG-quantitative,+ or - 5 50 IU/L + or - 10% > 50 IU/L Prof. Opinion
+Urine Chemistry,Magnesium,+ or - 0.3 2.0 mmol/L + or - 15% > 2.0 mmol/L Prof. Opinion
+Urine Chemistry,Total PSA,+ or - 0.4 5.0 µg/L + or - 8% > 5.0 µg/L Imprecision Optimal
+Urine Chemistry,N-Telopeptides,+ or - 80 700 nmolBCE/L + or - 10% > 700 nmolBCE/L Prof. Opinion
+Urine Chemistry,Osmolality,+ or - 6 300 mmol/kg + or - 2% > 300 mmol/kg Prof. Opinion
+Urine Chemistry,Potassium,+ or - 2 20 mmol/L + or - 10% > 20 mmol/L Prof. Opinion
+Urine Chemistry,Phosphate,+ or - 3 20 mmol/L + or - 15% > 20 mmol/L Prof. Opinion
+Urine Chemistry,Sodium,+ or - 4 40 mmol/L + or - 10% > 40 mmol/L Prof. Opinion
+Urine Chemistry,Total Protein,+ or - 0.10 1.00 g/L + or - 10% > 1.00 g/L Prof. Opinion
+Urine Chemistry,Urate,+ or - 0.3 2 mmol/L + or - 15% > 2 mmol/L Prof. Opinion
+Urine Chemistry,Urea,+ or - 20 200 mmol/L + or - 10% > 200 mmol/L Prof. Opinion
+Urine Chemistry,ACR,+ or - 0.5 3.5 mg/mmol + or - 15% > 3.5 mg/mmol Prof. Opinion
+Vitamins,Vitamin A,+ or - 0.2 1.7 µmol/L + or - 12% > 1.7 µmol/L Imprecision Desirable
+Vitamins,Vitamin E,+ or - 3 25 µmol/L + or - 12% > 25 µmol/L Imprecision Desirable
+Vitamins,β Carotene,+ or - 0.4 2.0 µmol/L + or - 25% > 2.0 µmol/L Total Error Optimal
+Vitamins,Total Carotenoids,+ or - 0.8 4.0 µmol/L + or - 25% > 4.0 µmol/L Total Error Optimal
+Vitamins,Vitamin B2,+ or - 25 250 nmol/L + or - 10% > 250 nmol/L
+Vitamins,Vitamin C,+ or - 7 35 µmol/L + or - 20% > 35 µmol/L Imprecision Desirable
