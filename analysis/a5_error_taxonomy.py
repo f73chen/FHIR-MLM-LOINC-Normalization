@@ -80,16 +80,19 @@ def rows_for_run(d, label, cond, s, table, space, is_chem, marg, sev_rows, conf_
         # "time/scale/method only", which are two exclusive classes. The order-free analogue
         # compares COMPONENT-touching errors with analyte-preserving ones, and near misses
         # (1 axis) with distant ones (>=3). Each is also compared with the correct predictions.
+        # The 2-axis group between the near misses and the distant ones is stored as well.
         cp = err.p_top1.values
         cm = mask & diffs["COMPONENT"].values
         nm = mask & ~diffs["COMPONENT"].values
         a1 = mask & (nax == 1)
+        a2 = mask & (nax == 2)
         a3 = mask & (nax >= 3)
         row["n_COMPONENT"] = int(cm.sum())
         row["n_no_COMPONENT"] = int(nm.sum())
         row["mean_conf_COMPONENT"] = float(cp[cm].mean()) if cm.any() else np.nan
         row["mean_conf_no_COMPONENT"] = float(cp[nm].mean()) if nm.any() else np.nan
         row["mean_conf_1axis"] = float(cp[a1].mean()) if a1.any() else np.nan
+        row["mean_conf_2axes"] = float(cp[a2].mean()) if a2.any() else np.nan
         row["mean_conf_3plus_axes"] = float(cp[a3].mean()) if a3.any() else np.nan
         okm = d.correct.values & (np.ones(len(d), bool) if subset == "all"
                                   else is_chem[d.true_idx.values])

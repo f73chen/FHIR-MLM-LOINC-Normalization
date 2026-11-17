@@ -230,15 +230,33 @@ The baselines need a GPU, and `b4_oneshot_baselines.py` runs once per model and 
 TF-IDF on the CPU, so run it once on a quiet machine.
 
 `v3_all.py` runs every Chapter 6 analysis in order, from the evaluation outputs of `15` and `16`. Its last steps
-write the tables, the figures, and the numbers book (`results/analysis/v3/numbers.md`). The numbers book lists
-the numbers that Chapters 6–8 quote, with the observations each one is computed on. `appendix/tables.py` writes
-the tables and numbers of the appendices.
+write the tables, the figures, and the numbers book. The numbers book lists the numbers that Chapters 6–8 quote,
+with the observations each one is computed on. `appendix/tables.py` writes the tables and numbers of the
+appendices.
+
+The thesis compares the trained models on one evaluated set of test observations (Chapter 5). These are the
+observations that every trained model scores in every test dataset, without the test patients in the first
+pretraining corpus of FHIR-MLM. To reproduce the tables and figures of the thesis, build the set once, after
+`refrange_diagnostic.py`, and run the analyses with `N8_EVALSET=both`:
+
+```
+python analysis/lib/evalset.py build
+N8_EVALSET=both python analysis/v3_all.py
+```
+
+With the switch on, results go to `results/analysis/v3_both/` and the numbers book is
+`results/analysis/v3/numbers_both.md`. Without it, every analysis reads all the observations that each model
+scores, results go to `results/analysis/v3/`, and the numbers book is `results/analysis/v3/numbers.md`. The
+numbers book of the evaluated set also sets the two runs side by side (`v3_ownset.py`, Chapter 7), so it needs
+both. The key file of the evaluated set holds patient identifiers. It is written to
+`WORK_DIR/analysis/evalset_both/` and must stay out of git.
 
 The Chapter 2, 4, and 5 scripts (`ch2_*`, `ch4_*`, and `ch5_*`) run on their own. So do the perturbation
-analyses that step 5 does not need: `a16`, `a17` then `a22`, `a19`, `a21`, `a25`, `a26`, and
-`a32_bin_change_final`. `ch2_encoding_density_v3_codelast.py`, `ch2_two_encodings_tokens.py`, and
-`ch4_relma_coverage_v3.py` run in the deep-models environment, because they read the deep models' datasets or
-tokenizer. Results go to `results/`, which git ignores.
+analyses that step 5 does not need: `a16`, `a17` then `a22`, `a19`, `a21`, `a25`, `a26`,
+`a32_bin_change_final`, and `a34_text_token_change`, which loads the tokenizers of BioClinical ModernBERT and
+Llama. `ch2_encoding_density_v3_codelast.py`, `ch2_two_encodings_tokens.py`, and `ch4_relma_coverage_v3.py`
+run in the deep-models environment, because they read the deep models' datasets or tokenizer. Results go to
+`results/`, which git ignores.
 
 ## Tables and figures
 
@@ -254,31 +272,33 @@ The scripts name tables and figures by ID (T-41, F-26), and `v3_tables.py` and `
 | Table 4.2 | T-04 | `analysis/ch4_frequency_bins_table.py` |
 | Table 4.3 | T-38 | `analysis/ch4_magnitude_sources_table.py` |
 | Figure 4.1 | F-15 | `analysis/ch4_imbalance_figure.py` |
-| Figure 4.2 | F-27 | `analysis/ch4_paraphrase_similarity_figure.py` |
 | Table 5.1 | T-08 | `analysis/ch5_model_sizes_table.py` |
 | Table 5.2 | T-39 | `analysis/ch5_train_test_matrix_table.py` |
 | Figure 5.1 | F-19 | `analysis/ch5_two_units_bridge_figure.py` |
+| Figure C.1 | F-27 | `analysis/ch4_paraphrase_similarity_figure.py` |
 
 Chapter 6 tables (`analysis/v3_tables.py`):
 
 | Table | ID | Table | ID | Table | ID | Table | ID |
 |---|---|---|---|---|---|---|---|
-| 6.1 | T-10 | 6.8 | T-15 | 6.15 | T-42 | 6.22 | T-30 |
+| 6.1 | T-10 | 6.8 | T-15 | 6.15 | T-42 | 6.22 | T-24 |
 | 6.2 | T-11 | 6.9 | T-16 | 6.16 | T-43 | 6.23 | T-19 |
 | 6.3 | T-12 | 6.10 | T-17 | 6.17 | T-47 | 6.24 | T-20 |
 | 6.4 | T-14 | 6.11 | T-49 | 6.18 | T-48 | 6.25 | T-25 |
-| 6.5 | T-32 | 6.12 | T-41 | 6.19 | T-24 | 6.26 | T-28 |
-| 6.6 | T-34 | 6.13 | T-46 | 6.20 | T-21 | 6.27 | T-26 |
-| 6.7 | T-35 | 6.14 | T-45 | 6.21 | T-22 | 6.28 | T-50 |
+| 6.5 | T-32 | 6.12 | T-41 | 6.19 | T-21 | 6.26 | T-28 |
+| 6.6 | T-34 | 6.13 | T-46 | 6.20 | T-30 | 6.27 | T-26 |
+| 6.7 | T-35 | 6.14 | T-45 | 6.21 | T-22 |  |  |
 
 Chapter 6 figures (`analysis/v3_figures.py`):
 
 | Figure | ID | Figure | ID | Figure | ID | Figure | ID |
 |---|---|---|---|---|---|---|---|
-| 6.1 | F-12 | 6.3 | F-26 | 6.5 | F-06 | 6.7 | F-10a |
-| 6.2 | F-02 | 6.4 | F-05 | 6.6 | F-11 | 6.8 | F-10b |
+| 6.1 | F-12 | 6.3 | F-05 | 6.5 | F-26 | 6.7 | F-10b |
+| 6.2 | F-02 | 6.4 | F-06 | 6.6 | F-11 |  |  |
 
 The appendix tables (A.1–F.3) have the same numbers as in the thesis. `analysis/appendix/tables.py` writes them.
+
+The scripts also build one table and one figure that the thesis does not print (T-50 and F-10a).
 
 ## Tests
 

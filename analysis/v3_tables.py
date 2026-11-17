@@ -235,7 +235,7 @@ def t10(S):
         body.append([m, ob("top1_mean"), ob("top5_mean"), pcd(r.top1_mean), rng(r.top1_A_lo, r.top1_A_hi, pcd),
                      pcd(r.top5_mean), po(r.dep_mean), rng(r.dep_A_lo, r.dep_A_hi, po)])
     return {"header": ["Model", "Top-1", "Top-5", "Top-1", "95% CI", "Top-5", "Top-1", "95% CI"],
-            "groups": [("Per observation (%)", 1, 2), ("Per code (%)", 3, 5), ("Deployed (%)", 6, 7)],
+            "groups": [("Per-observation (%)", 1, 2), ("Per-code (%)", 3, 5), ("Deployed (%)", 6, 7)],
             "body": body, "right": set(range(1, 8)), "total": False, "present": list(j.index)}
 
 
@@ -262,7 +262,7 @@ def t32(S):
             ["Difference (pp)", sg(100 * r.a_minus_b, 2), ci(100 * r.diff_lo, 100 * r.diff_hi, 2), sg(100 * dm, 1),
              ci(100 * lo, 100 * hi, 1), sg(100 * (h.dep_mean - s1.dep_mean), 2)]]
     return {"header": ["Setup", "Top-1", "95% CI", "Top-1", "95% CI", "Top-1"],
-            "groups": [("Per observation (%)", 1, 2), ("Per code (%)", 3, 4), ("Deployed (%)", 5, 5)],
+            "groups": [("Per-observation (%)", 1, 2), ("Per-code (%)", 3, 4), ("Deployed (%)", 5, 5)],
             "body": body, "right": set(range(1, 6)), "total": True, "present": ["FHIR-MLM"]}
 
 
@@ -288,7 +288,7 @@ def t35(S):
     is on FHIR-MLM's own rows for that condition. Per observation it has the joint patient × seed interval, and
     per code the paired code × seed interval."""
     header = ["Names", "History", "Single obs.", "Difference (pp)", "History", "Single obs.", "Difference (pp)"]
-    groups = [("Per observation (%)", 1, 3), ("Per code (%)", 4, 6)]
+    groups = [("Per-observation (%)", 1, 3), ("Per-code (%)", 4, 6)]
     p, d = _so(S, "para_xsite"), _so(S, "nodesc_xsite")
     rl = S["singleobs_relma.csv"].set_index("names")
     if "relma_s1_a0" not in rl.index:
@@ -326,7 +326,7 @@ def t15(S):
              pcd(p.loc[m, "top1_mean"]), pcd(d.loc[m, "top1_mean"]),
              sg(100 * (d.loc[m, "top1_mean"] - p.loc[m, "top1_mean"]), 1)] for m in both]
     return {"header": ["Model", "Para", "NoDesc", "Change (pp)", "Para", "NoDesc", "Change (pp)"],
-            "groups": [("Per observation (%)", 1, 3), ("Per code (%)", 4, 6)], "body": body,
+            "groups": [("Per-observation (%)", 1, 3), ("Per-code (%)", 4, 6)], "body": body,
             "right": {1, 2, 3, 4, 5, 6}, "total": False, "present": both}
 
 
@@ -338,7 +338,7 @@ def t16(S):
     body = [[m, po(r.obs_mean), pcd(r.top1_mean), rng(r.top1_A_lo, r.top1_A_hi, pcd), pcd(r.top5_mean), po(r.dep_mean),
              rng(r.dep_A_lo, r.dep_A_hi, po)] for m, r in j.reindex(_models_in(j, ALL4)).iterrows()]
     return {"header": ["Model", "Top-1", "Top-1", "95% CI", "Top-5", "Top-1", "95% CI"],
-            "groups": [("Per observation (%)", 1, 1), ("Per code (%)", 2, 4), ("Deployed (%)", 5, 6)],
+            "groups": [("Per-observation (%)", 1, 1), ("Per-code (%)", 2, 4), ("Deployed (%)", 5, 6)],
             "body": body, "right": set(range(1, 7)), "total": False, "present": list(j.index)}
 
 
@@ -451,7 +451,7 @@ def t21(S):
        "in parentheses)", [("catalogue", "catalogue_joint.csv")], ALL4)
 def t30(S):
     body, gaps, present = [], set(), set()
-    blocks = [("Paraphrase", _joint(S, "para_D")), ("RELMA", _joint(S, "relma_a0_D"))]
+    blocks = [("Para", _joint(S, "para_D")), ("RELMA", _joint(S, "relma_a0_D"))]
     # NoDesc at the bottom: FHIR-MLM and TF-IDF on their own matched codes, as F-12's panel (c)
     pj = load("catalogue_per_model", "catalogue_joint.csv")
     if pj is not None and (pj.arm == "nodesc_D").any():
@@ -589,10 +589,11 @@ def t14(S):
              f"{100 * r.pct_codes_wrong_mean:.1f}", f"{100 * r.pct_vol_wrong_mean:.2f}", f(r.med_obs_wrong_mean, 1),
              f(r.med_obs_right_mean, 1)]
             for m, r in j.reindex(_models_in(j, ALL4)).iterrows()]
-    # each column reads as a phrase without the caption: "wrong codes: % of observations",
+    # each column reads as a phrase without the caption: "wrong local codes: % of observations",
     # "median observations per code: wrong". No label is used twice.
-    return {"header": ["Model", "Number", "% of codes", "% of observations", "Wrong", "Correct"],
-            "groups": [("Wrong codes", 1, 3), ("Median observations per code", 4, 5)], "body": body,
+    # The codes counted here are local codes, and the labels say so.
+    return {"header": ["Model", "Number", "% of local codes", "% of observations", "Wrong", "Correct"],
+            "groups": [("Wrong local codes", 1, 3), ("Median observations per code", 4, 5)], "body": body,
             "right": set(range(1, 6)), "total": False, "present": list(j.index)}
 
 
@@ -602,7 +603,7 @@ def t17(S):
     t = S["obs_relma_vs_para.csv"].set_index("model")
     body = [[m, po(r.relma_mean), po(r.para_mean), with_sd(sg(100 * r.change_mean, 2), 100 * r.change_sd)]
             for m, r in t.reindex(_models_in(t, ALL4)).iterrows()]
-    return {"header": ["Model", "RELMA", "Paraphrase", "Change (pp)"],
+    return {"header": ["Model", "RELMA", "Para", "Change (pp)"],
             "groups": [("Per-observation top-1 (%)", 1, 2)], "body": body,
             "right": {1, 2, 3}, "total": False, "present": list(t.index)}
 
@@ -613,21 +614,41 @@ def t20(S):
     a = S["errors_axis_marginals.csv"]
     a = a[(a.subset == "all") & (a.condition == "para_xsite")]
     g = a.groupby("model").mean(numeric_only=True)
+    # every error falls in one of the three error columns
+    two = "mean_conf_2axes"
     body = [[m, f(g.loc[m, "mean_conf_correct"], 3), f(g.loc[m, "mean_conf_1axis"], 3),
-             f(g.loc[m, "mean_conf_3plus_axes"], 3)] for m in ALL4 if m in g.index]
-    return {"header": ["Model", "Correct", "1 axis differs", "≥ 3 axes differ"], "body": body,
-            "right": {1, 2, 3}, "total": False, "present": list(g.index)}
+             f(g.loc[m, two], 3) if two in g.columns else "—", f(g.loc[m, "mean_conf_3plus_axes"], 3)]
+            for m in ALL4 if m in g.index]
+    return {"header": ["Model", "Correct", "1 axis differs", "2 axes differ", "≥ 3 axes differ"], "body": body,
+            "right": {1, 2, 3, 4}, "total": False, "present": list(g.index),
+            "incomplete": [] if two in g.columns else ["the 2-axis column (run v3_errors.py --stage run)"]}
 
 
-@table("T-22", "per-observation auto-map coverage at an error budget (para, scenario D, matched set, means over seeds)",
+@table("T-22", "per-observation auto-map coverage at an error budget, paraphrase and RELMA names (scenario D, means over seeds)",
        [("calibration", "selective_matched.csv")], ALL4)
 def t22(S):
+    """Paraphrase and RELMA names side by side in T-24's layout. Each block gives the mean over seeds at each budget
+    and the worst to best seed at the stricter one. There is no 5% column because every model's error rate is below
+    5%, so each auto-maps 100% there."""
     s = S["selective_matched.csv"]
-    # no 5% column: every model's error rate is below 5%, so each auto-maps 100% there
-    g = s[s.condition == "para_xsite"].groupby("model")[["cov@0.001", "cov@0.01"]].mean()
-    body = [[m] + [po(r[c]) for c in ("cov@0.001", "cov@0.01")] for m, r in g.reindex(_models_in(g, ALL4)).iterrows()]
-    return {"header": ["Model", "0.1%", "1%"], "groups": [("Coverage (%) at an error budget of", 1, 2)],
-            "body": body, "right": {1, 2}, "total": False, "present": list(g.index)}
+    blocks = [s[s.condition == c].groupby("model").agg(c01=("cov@0.001", "mean"), lo=("cov@0.001", "min"),
+                                                       hi=("cov@0.001", "max"), c1=("cov@0.01", "mean"),
+                                                       k=("seed", "nunique"))
+              for c in ("para_xsite", "relma_a0")]
+    present = sorted(set().union(*(g.index for g in blocks)))
+    body = []
+    for m in [m for m in ALL4 if m in present]:
+        row = [m]
+        for g in blocks:
+            if m not in g.index:
+                row += ["—"] * 3
+                continue
+            r = g.loc[m]
+            row += [po(r.c01), rng(r.lo, r.hi, po) if r.k > 1 else "—", po(r.c1)]
+        body.append(row)
+    return {"header": ["Model"] + ["0.1%", "Range", "1%"] * 2, "groups": [("Para", 1, 3), ("RELMA", 4, 6)],
+            "body": body, "right": set(range(1, 7)), "total": False, "present": present,
+            "incomplete": [] if len(blocks[1]) else ["the RELMA columns (run v3_calibration.py --stage metrics)"]}
 
 
 @table("T-28", "off-the-shelf models, few-shot: what the output was (4,952 observations)",

@@ -15,7 +15,8 @@ spike.
 
 A fixed cohort is plotted instead. For each model, only patients whose record reaches window index
 DEPTH are kept, i.e. DEPTH+1 windows or more. Windows 0..DEPTH-1 are plotted, so every x-position
-describes the same patients.
+describes patients of the same cohort. For FHIR-MLM a position can hold fewer of them, because a window
+before the first Encounter of a patient is not scored.
 
 The cohort needs one more window than is plotted. The extra window is intended. With a window
 beyond the plotted range, every plotted window is non-final. Only non-final windows are full,

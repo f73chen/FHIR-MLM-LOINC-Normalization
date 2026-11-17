@@ -31,11 +31,11 @@ FIG = HERE.parent / "results" / "analysis" / "a1" / "figures"
 TAB = HERE.parent / "results" / "analysis" / "a1" / "tables"
 NAME = "ch5_train_test_matrix"
 
-GROUP, ROWHEAD, COLS, ROWS = "Test arm", "Train arm", ["Clean", "Perturbed"], ["Clean", "Perturbed"]
+GROUP, ROWHEAD, COLS, ROWS = "Test numbers", "Training numbers", ["Clean", "Perturbed"], ["Clean", "Perturbed"]
 #: (letter, description lines) per (train arm, test arm), line-broken for width
 CELLS = {("Clean", "Clean"): ("A", ["The unperturbed baseline"]),
          ("Clean", "Perturbed"): ("B", ["The fragility of generalizing", "from a single site"]),
-         ("Perturbed", "Clean"): ("C", ["Performance loss due to", "generalization"]),
+         ("Perturbed", "Clean"): ("C", ["The home-site cost of", "robustness"]),
          ("Perturbed", "Perturbed"): ("D", ["The robust model"])}
 LINE = 1.2 * BT.SIZE       # line pitch inside a cell (LaTeX's 12 pt baselineskip at 10 pt)
 HANG = 0.6 * BT.SIZE       # space between the bold letter and its description

@@ -76,7 +76,7 @@ SEEN_CODES_PATH = str(locations.UPSTREAM / "seen_codes.csv")
 # -- Model / task --
 MODEL_NAME = "thomas-sounack/BioClinical-ModernBERT-large"
 NUM_LABELS = N_LAB_CLASSES   # 1623
-MAX_LEN = 8192
+MAX_LEN = 8192              # the context length of the datasets. 10_bcm_dataset.py applies it, and it is not read here
 
 # -- Hyperparameters (optimizer settings kept model-specific) --
 GPU_BATCH_SIZE = 8          # per-device train batch (a short run checks it fits in 24 GB)

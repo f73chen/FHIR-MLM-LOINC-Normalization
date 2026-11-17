@@ -73,7 +73,8 @@ def cells_v3(m):
 
 def frame(c) -> pd.DataFrame:
     """Top-1 frame (mapping-first) with b3's columns: window_idx and late for a sliding dump."""
-    f = D.top1_frame(c, extra=("window_idx",)) if c.evalset == "sliding" else D.top1_frame(c)
+    # evaluated=False: the sliding-window analysis keeps all its patients, also under N8_EVALSET
+    f = D.top1_frame(c, extra=("window_idx",), evaluated=False) if c.evalset == "sliding" else D.top1_frame(c, evaluated=False)
     if "window_idx" in f:
         f["late"] = f.window_idx > 0
     return f
@@ -145,7 +146,8 @@ def alignment(m: str, sl: pd.DataFrame, gold: pd.DataFrame) -> pd.DataFrame:
 
 
 def stage_run(out: Path) -> list[str]:
-    full = D.top1_frame(R.cell("tfidf", 0, condition="para_xsite", train_arm="pert", test_arm="pert"))[KEY + ["true_loinc"]]
+    full = D.top1_frame(R.cell("tfidf", 0, condition="para_xsite", train_arm="pert", test_arm="pert"),
+                        evaluated=False)[KEY + ["true_loinc"]]
     summ, dens, coh, sizes, ali, done = [], [], [], [], [], []
     for m in DEEP:
         c_sl, c_can = cells_v3(m)

@@ -169,6 +169,10 @@ def did_rows(frames: dict, pretrain: set, seed, n_boot=N_BOOT) -> list[dict]:
 
 
 def stage_did(out: Path) -> list[str]:
+    if D._evalset().active():
+        # the evaluated set excludes the stage-1 pretraining patients, so there is no overlap left to test
+        print("  skipped: the evaluated set (N8_EVALSET) excludes the stage-1 pretraining patients, so no DiD is run")
+        return []
     pretrain = pretrain_patients()
     rows, facts, used = [], [], set()
     for letter in "ABCD":
@@ -269,7 +273,13 @@ def joint_split_ci(frames: list, n_boot=N_BOOT, seed=0) -> dict:
 
 def stage_ambiguity(out: Path) -> list[str]:
     amb, n_str = ambiguous_strings()
-    desc = desc_by_key(amb)
+    full = desc_by_key(amb)
+    for letter in "ABC":                    # every cell shows the same string per observation (whole dumps)
+        o = pd.read_parquet(cellX("tfidf", 0, letter).path / "part-0000.parquet", columns=KEY + ["desc_shown"])
+        j = full[KEY + ["desc_shown"]].merge(o, on=KEY, how="outer", indicator=True)
+        if (j._merge != "both").any() or (j.desc_shown_x != j.desc_shown_y).any():
+            raise AssertionError(f"cell {letter}'s TF-IDF dump shows different descriptions from cell D's")
+    desc = D._evalset().restrict(cellD("tfidf", 0), full)   # the counts and splits use the evaluated set
     pairs = desc.groupby(["patient_uuid", "true_loinc"]).agg(
         n_desc=("desc_shown", "nunique"), ambiguous=("ambiguous", "any"))
     counts = pd.DataFrame([
@@ -278,11 +288,6 @@ def stage_ambiguity(out: Path) -> list[str]:
          "n_shown_more_than_one_string": int((pairs.n_desc > 1).sum())},
         {"unit": "test observations", "n": len(desc), "n_ambiguous": int(desc.ambiguous.sum())}])
     counts["share"] = counts.n_ambiguous / counts.n
-    for letter in "ABC":                    # every cell shows the same string per observation
-        o = pd.read_parquet(cellX("tfidf", 0, letter).path / "part-0000.parquet", columns=KEY + ["desc_shown"])
-        j = desc[KEY + ["desc_shown"]].merge(o, on=KEY, how="outer", indicator=True)
-        if (j._merge != "both").any() or (j.desc_shown_x != j.desc_shown_y).any():
-            raise AssertionError(f"cell {letter}'s TF-IDF dump shows different descriptions from cell D's")
     rows, summ = [], []
     for letter in "ABCD":
         for m in R.CONDITIONS["para_xsite"]:

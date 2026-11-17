@@ -107,7 +107,8 @@ def build(write=True):
         return tw(s, mono) + 2 * BOX_PAD
 
     W = (FS.TEXTWIDTH - 2 * plt.rcParams["savefig.pad_inches"]) * 72
-    head = ["Field", "FHIR-MLM", "n", "BioClinical ModernBERT (text)", "n"]
+    # The two count columns are headed "Tokens", so the caption does not have to say what they count.
+    head = ["Field", "FHIR-MLM", "Tokens", "BioClinical ModernBERT (text)", "Tokens"]
 
     # Rows that need two lines break at a set point inside the field. The reference range is low
     # then high in both columns, so the two columns mirror each other. FHIR-MLM breaks after its
@@ -127,7 +128,7 @@ def build(write=True):
 
     w_field = max(tw(s, serif) for s in ROWS + ["Total", head[0]])
     w_fhir = max(max(width_of(s) for r in ROWS for s in segments(r, fhir[r], "fhir")), tw(head[1], serif))
-    w_n = max(tw("77", serif), tw("n", serif))
+    w_n = max(tw("77", serif), tw(head[2], serif))
     x_field = PAD
     x_fhir = x_field + w_field + 2 * PAD
     x_n1 = x_fhir + w_fhir + 2 * PAD

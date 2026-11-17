@@ -44,6 +44,8 @@ from lib import registry as R  # noqa: E402
 
 _A = importlib.util.spec_from_file_location("a2c", HERE / "a2_calibration.py")
 A = importlib.util.module_from_spec(_A); _A.loader.exec_module(A)
+_O = importlib.util.spec_from_file_location("v3obs_c", HERE / "v3_observation.py")
+OBS = importlib.util.module_from_spec(_O); _O.loader.exec_module(OBS)      # GROUPS and the training counts
 
 ANALYSIS = "calibration"
 KEY = ["patient_uuid", "obs_ordinal"]
@@ -89,8 +91,16 @@ def reduction_path(cell, tag="") -> Path:
 
 
 # -- reductions to rows ------------------------------------------------------
-def load_red(p: Path) -> pd.DataFrame:
-    return pd.read_parquet(p)
+def load_red(p: Path, columns=None) -> pd.DataFrame:
+    """A reduction, restricted to the evaluated set when N8_EVALSET is on. The cell is read off the file
+    name, without the tags that reduction_path adds. Validation cells and names that do not parse are left
+    whole."""
+    df = pd.read_parquet(p, columns=columns)
+    name = p.stem
+    for tag in ("__Tfit", "__Tind"):
+        name = name.replace(tag, "")
+    c = R.parse(name)
+    return D._evalset().restrict(c, df) if c is not None else df
 
 
 def _mi(df) -> pd.MultiIndex:
@@ -100,7 +110,7 @@ def _mi(df) -> pd.MultiIndex:
 def matched_keys(paths) -> pd.MultiIndex:
     keys = None
     for p in paths:
-        k = _mi(pd.read_parquet(p, columns=KEY))
+        k = _mi(load_red(p, columns=KEY))
         keys = k if keys is None else keys.intersection(k)
     return keys
 
@@ -118,6 +128,32 @@ def calib_row(df) -> dict:
             "brier_top": C.brier_top(conf, corr), "mean_conf": conf.mean(),
             "gap_conf_minus_acc": conf.mean() - corr.mean(),
             "mean_outside_mass": df.dropped.to_numpy().mean() if "dropped" in df else np.nan}
+
+
+def frequency_groups() -> np.ndarray:
+    """The training-frequency group (rare, common or frequent, as in v3_observation.GROUPS) of each LOINC
+    code of the 679-code label space, by its number of training observations."""
+    tc = OBS.train_count_map()
+    n = np.array([tc.get(l, 0) for l in A.canonical_space()], dtype=float)
+    out = np.empty(len(n), dtype=object)
+    for name, lo, hi in OBS.GROUPS:
+        out[(n >= lo) & (n < hi)] = name
+    return out
+
+
+def frequency_rows(df, group_of_label, **ids) -> list[dict]:
+    """Per-observation calibration by the training frequency of the true LOINC code. The overall ECE cannot
+    show this, since the observations of rare codes are a small share of the test set. `group_of_label[i]`
+    is the group of label i of the 679-code space (`frequency_groups`)."""
+    g = np.asarray(group_of_label, dtype=object)[df.true_idx.to_numpy()]
+    rows = []
+    for name, _, _ in OBS.GROUPS:
+        d = df[g == name]
+        if len(d):
+            conf, corr = d.p_top1.to_numpy(), d.correct.to_numpy()
+            rows.append({**ids, "group": name, "n": len(d), "acc": corr.mean(), "mean_conf": conf.mean(),
+                         "gap_conf_minus_acc": conf.mean() - corr.mean(), "ece_mass15": C.ece(conf, corr, 15, "mass")})
+    return rows
 
 
 def selective_row(df, budgets=R.BUDGETS_OBS) -> dict:
@@ -330,7 +366,8 @@ def _cell_D(m, s, condition="para_xsite"):
 def stage_metrics(out: Path, rq3_out: Path) -> list[str]:
     present = {cond: [m for m in R.CONDITIONS[cond] if reduction_path(_cell_D(m, 0, cond)).exists()]
                for cond in R.CONDITIONS}
-    cal, sel, bins, curves, ece_ci = [], [], [], [], []
+    cal, sel, bins, curves, ece_ci, freq = [], [], [], [], [], []
+    grp = frequency_groups()
     for cond, models in present.items():
         keys = matched_keys([reduction_path(_cell_D(m, 0, cond)) for m in models])
         print(f"  matched set [{cond}, cell D]: {len(keys):,} observations over "
@@ -348,6 +385,7 @@ def stage_metrics(out: Path, rq3_out: Path) -> list[str]:
                         sel.append({**ids, **selective_row(df)})
                         curves += curve_rows(df, **ids)      # every seed: F-06 draws the median
                         bins += bins_rows(df, **ids)         # every seed: F-05 draws the mean
+                        freq += frequency_rows(df, grp, **ids)
                     if s == R.SEEDS[m][0]:
                         r = C.bootstrap_clustered(df.patient_uuid.to_numpy(),
                                                   lambda conf, corr: C.ece(conf, corr, 15, "mass"),
@@ -355,12 +393,15 @@ def stage_metrics(out: Path, rq3_out: Path) -> list[str]:
                                                   corr=df.correct.to_numpy())
                         ece_ci.append({**ids, "n": len(df), "ece": r["point"], "ece_lo": r["lo"],
                                        "ece_hi": r["hi"], "n_boot": N_BOOT_ECE})
-    curves += relma_curve_rows()
+    rc, rs = relma_rows()                      # RELMA names, for panel (b) of F-06 and the RELMA columns of T-22
+    curves += rc
+    sel += rs
     pd.DataFrame(cal).to_csv(out / "calibration_matched.csv", index=False)
     pd.DataFrame(sel).to_csv(out / "selective_matched.csv", index=False)
     pd.DataFrame(bins).to_csv(out / "reliability_bins.csv", index=False)
     pd.DataFrame(curves).to_csv(out / "risk_coverage_curves.csv", index=False)
     pd.DataFrame(ece_ci).to_csv(out / "ece_ci.csv", index=False)
+    pd.DataFrame(freq).to_csv(out / "calibration_by_frequency.csv", index=False)
     # RQ3: per-cell ECE, each model on its own rows
     rq = []
     for cond in R.CONDITIONS:
@@ -382,11 +423,23 @@ def stage_metrics(out: Path, rq3_out: Path) -> list[str]:
     return sorted({m for ms in present.values() for m in ms})
 
 
-def relma_curve_rows() -> list[dict]:
-    """Data for the RELMA panel of F-06: risk-coverage curves on RELMA names (draw a0, the para-trained
-    models at cell D, T = 1) for every seed. They use the observations that every model scored with a RELMA
-    name in the dump of its first seed. This is the rule of the paraphrase matched set, on RELMA-named rows
-    only."""
+def relma_rows_from(frames) -> tuple[list[dict], list[dict]]:
+    """Curve rows and selective-prediction rows for RELMA names from (model label, seed, frame) triples. They
+    come from the same row functions as the paraphrase conditions (`curve_rows`, `selective_row`), under the
+    condition name "relma_a0" at T = 1, so that T-22 can show RELMA names beside paraphrases."""
+    curves, sel = [], []
+    for label, seed, df in frames:
+        ids = {"model": label, "condition": "relma_a0", "seed": seed, "scaling": "T=1"}
+        curves += curve_rows(df, **ids)
+        sel.append({**ids, **selective_row(df)})
+    return curves, sel
+
+
+def relma_rows() -> tuple[list[dict], list[dict]]:
+    """Data for the RELMA panel of F-06 and the RELMA columns of T-22. These are risk-coverage curves and the
+    coverage at the error budgets on RELMA names (draw a0, the para-trained models at cell D, T = 1) for every
+    seed. They use the observations that every model scored with a RELMA name in the dump of its first seed.
+    This is the rule of the paraphrase matched set, on RELMA-named rows only."""
     space = A.canonical_space()
 
     def covered(m, s):
@@ -401,18 +454,20 @@ def relma_curve_rows() -> list[dict]:
     first = {m: covered(m, R.SEEDS[m][0]) for m in R.CONDITIONS["para_xsite"]}
     first = {m: b for m, b in first.items() if b is not None}
     if not first:
-        return []
+        return [], []
     keys = None
     for b in first.values():
         keys = _mi(b) if keys is None else keys.intersection(_mi(b))
     print(f"  matched set [RELMA a0, cell D]: {len(keys):,} observations over {[R.LABEL[m] for m in first]}", flush=True)
-    rows = []
-    for m, b0 in first.items():
-        for s in R.SEEDS[m]:
-            b = b0 if s == R.SEEDS[m][0] else covered(m, s)
-            if b is not None:
-                rows += curve_rows(restrict(b, keys), model=R.LABEL[m], condition="relma_a0", seed=s, scaling="T=1")
-    return rows
+
+    def frames():
+        for m, b0 in first.items():
+            for s in R.SEEDS[m]:
+                b = b0 if s == R.SEEDS[m][0] else covered(m, s)
+                if b is not None:
+                    yield R.LABEL[m], s, restrict(b, keys)
+
+    return relma_rows_from(frames())
 
 
 def _print_headline(cal, sel):

@@ -18,7 +18,7 @@ their code's decision is applied are shaded light grey. There is no title, gloss
 label. The caption explains grouping, applying back, the shading and that this is a toy. Panels have
 names and no letters, because (a)-(c) could be confused with codes A-C.
 
-Writes results/analysis/ch5/figures/ch5_two_units_bridge_v2.*.
+Writes results/analysis/ch5/figures/ch5_two_units_bridge_v3.* (ch5_two_units_bridge_v2.* with version=2).
 
   python analysis/ch5_two_units_bridge_figure.py
 """
@@ -33,6 +33,7 @@ _F = importlib.util.spec_from_file_location("figstyle", HERE / "lib" / "figstyle
 FS = importlib.util.module_from_spec(_F); _F.loader.exec_module(FS)
 FIG = HERE.parent / "results" / "analysis" / "ch5" / "figures"
 NAME = "ch5_two_units_bridge_v2"
+NAME_V3 = "ch5_two_units_bridge_v3"   # v2 plus each grouped result's mark in the per-code panel
 
 # toy pattern of (local code, per-observation correct?), with 8 of code A, 3 of B and 1 of C
 OBS = [("A", 1), ("A", 1), ("A", 1), ("A", 0), ("A", 1), ("A", 1), ("A", 1), ("A", 1),
@@ -85,7 +86,10 @@ def results_grid(ax, x0, oks, shaded=()):
         mark(ax, x + S / 2 + 0.11, y, ok)
 
 
-def build(write=True):
+def build(write=True, version=3):
+    """Draw the figure. In version 3 (the default) the per-code panel also shows each grouped result's check or
+    cross under its small square, so the reader sees which results are combined into the decision. Version 2 has
+    no such marks."""
     n_obs, obs_right, n_code, codes_right, deployed_right, code_right = compute()
     assert (n_obs, obs_right, n_code, codes_right, deployed_right) == (12, 9, 3, 2, 11)
     flipped = [i for i, (c, r) in enumerate(OBS) if not r and code_right[c]]
@@ -104,15 +108,20 @@ def build(write=True):
     x_last = x_dec - S / 2 - 0.36                   # centre of each group's last result
     for code, y in zip(CODES, ROWS):
         n = sum(1 for c, _ in OBS if c == code)
+        oks = [r for c, r in OBS if c == code]
         for j in range(n):
-            square(ax, x_last - (n - 1 - j) * (S_SMALL + 0.018), y, S_SMALL, code, 6.5)
+            xj = x_last - (n - 1 - j) * (S_SMALL + 0.018)
+            square(ax, xj, y, S_SMALL, code, 6.5)
+            if version >= 3:                       # the grouped result's own mark, under its square
+                ax.text(xj, y - S_SMALL / 2 - 0.07, r"$\checkmark$" if oks[j] else r"$\times$", ha="center",
+                        va="center", fontsize=6 if oks[j] else 7.5)
         arrow(ax, x_last + S_SMALL / 2 + 0.06, x_dec - S / 2 - 0.06, y)
         square(ax, x_dec, y, S, code, 8)
         mark(ax, x_dec + S / 2 + 0.11, y, code_right[code])
     # deployed: every result takes its code's decision
     results_grid(ax, xs[2], [code_right[c] for c, _ in OBS], shaded=flipped)
 
-    heads = ("Per observation", "Per local code", "Deployed")
+    heads = ("Per-observation", "Per-code", "Deployed")
     scores = (f"{obs_right}/{n_obs} = {obs_right / n_obs:.2f}", f"{codes_right}/{n_code} = {codes_right / n_code:.2f}",
               f"{deployed_right}/{n_obs} = {deployed_right / n_obs:.2f}")
     for x, h, sc in zip(xs, heads, scores):
@@ -122,7 +131,7 @@ def build(write=True):
         arrow(ax, xs[k] + P + 0.05, xs[k + 1] - 0.05, ROWS[1])
     if write:
         FIG.mkdir(parents=True, exist_ok=True)
-        print("wrote", FS.save(fig, str(FIG / NAME)))
+        print("wrote", FS.save(fig, str(FIG / (NAME_V3 if version >= 3 else NAME))))
     return fig
 
 

@@ -61,11 +61,11 @@ RULES = {
 DONE = {"RANDOMISE": "Randomized (A.5)",
         "MERGE": "Kept (interchangeable)",
         "NOT_A_UNIT_ISSUE": "Kept (mapping issue)"}
-A2_HEADER = ["Difference", "MIMIC-IV unit", "Terminology unit", "Codes", "Obs. (%)", "Action"]
+A2_HEADER = ["Difference", "MIMIC-IV unit", "Terminology unit", "Codes", "Observations (%)", "Action"]
 A3_HEADER = ["LOINC code", "Long common name"]
 
 
-A1_HEADER = ["Kind of quantity", "Target unit", "Source unit", "Factor"]
+A1_HEADER = ["Kind of quantity", "Representative unit", "Source unit", "Factor"]
 
 
 def conversion_groups():

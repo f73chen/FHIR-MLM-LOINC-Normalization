@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """
 Errors by LOINC axis on v3: which axes the errors differ on (T-19), confidence by how far an error is
-from the truth (T-20), and the distance and error-rate data behind F-09 (thesis Chapter 6).
+from the truth (T-20, for correct predictions and for errors on 1 axis, 2 axes, or 3 or more), and the
+distance and error-rate data behind F-09 (thesis Chapter 6).
 
   --stage run   a5's per-run taxonomy (`a5.rows_for_run`) on the v3 cell-D reductions, para and nodesc,
                 each model on its own rows, every seed
@@ -52,7 +53,7 @@ def stage_run(out: Path) -> list[str]:
                 p = V3C.reduction_path(R.cell(m, s, condition=cond, train_arm="pert", test_arm="pert"))
                 if not p.exists():
                     continue
-                A5.rows_for_run(pd.read_parquet(p), R.LABEL[m], cond, s, table, space, is_chem,
+                A5.rows_for_run(V3C.load_red(p), R.LABEL[m], cond, s, table, space, is_chem,
                                 marg, sev, conf, ex, examples=(s == R.SEEDS[m][0]))
                 done.add(m)
     marg = pd.DataFrame(marg)
@@ -63,7 +64,8 @@ def stage_run(out: Path) -> list[str]:
     a = marg[marg.subset == "all"]
     t19 = a.groupby(["condition", "model"])[["n_errors", "error_rate", "mean_axes_differing"]
                                             + [f"pct_{c}" for c in L.AXES]].mean()
-    t20 = a.groupby(["condition", "model"])[["mean_conf_correct", "mean_conf_1axis", "mean_conf_3plus_axes"]].mean()
+    t20 = a.groupby(["condition", "model"])[["mean_conf_correct", "mean_conf_1axis", "mean_conf_2axes",
+                                            "mean_conf_3plus_axes"]].mean()
     print("T-19 (mean over seeds):"); print(t19.to_string(float_format=lambda v: f"{v:.3f}"))
     print("\nT-20 (mean over seeds):"); print(t20.to_string(float_format=lambda v: f"{v:.3f}"))
     return sorted(done)

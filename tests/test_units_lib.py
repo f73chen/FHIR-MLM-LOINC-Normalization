@@ -84,11 +84,11 @@ def test_mass_to_molar_is_refused(U, src, dst):
 
 
 def test_dimension_alone_would_not_have_caught_it(U):
-    """Why the mole exponent is checked separately. mg/dL and mmol/L share a dimension vector once
-    mass is folded in, so a dimension-only rule would emit the forbidden conversion."""
+    """Why the mole exponent is checked separately. UCUM treats the mole as a plain number, so a molar
+    unit such as mmol/L has the dimension of a count per volume. The mole exponent tells them apart."""
     assert U.dim.get("mg/dL") == U.dim.get("mg/L")          # same dimension, same property: fine
     assert U.mole.get("mg/dL") == 0.0
-    assert U.mole.get("mmol/L") == 1.0                       # the mole exponent is what separates them
+    assert U.mole.get("mmol/L") == 1.0                       # a molar unit
 
 
 def test_incommensurable_dimensions_refused(U):

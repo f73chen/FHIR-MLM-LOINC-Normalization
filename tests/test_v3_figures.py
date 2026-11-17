@@ -39,3 +39,26 @@ def test_every_buildable_figure_draws(fid):
     for ax in fig.axes:
         assert not ax.get_title(), f"{fid}: no titles inside figures"
     F.plt.close(fig)
+
+
+@pytest.mark.parametrize("fid", ["F-12", "F-05", "F-06", "F-26"])
+def test_panel_labels_use_the_thesis_name_of_the_paraphrase_condition(fid):
+    """The paraphrase condition is "Para" in the thesis's captions and text, so the first panel of these four figures
+    is labelled "(a) Para"."""
+    spec = F.FIGS[fid]
+    src = {}
+    for a, fl in spec["needs"]:
+        df = F.T.load(a, fl)
+        if df is None:
+            pytest.skip(f"{fid}: {a}/{fl} not produced yet")
+        src[fl] = df
+    F.FS.apply_paper(9)
+    fig, _ = spec["fn"](src)
+    panels = [t.get_text() for ax in fig.axes for t in ax.texts if t.get_text().startswith("(")]
+    assert panels and panels[0] == "(a) Para", (fid, panels)
+    assert not [t for t in panels if "Paraphrase" in t], (fid, panels)
+    F.plt.close(fig)
+
+
+def test_the_paraphrase_panel_label():
+    assert F.PARA == "Para" and ("para_xsite", "Para") in F.CONDS

@@ -127,18 +127,18 @@ def values():
     recipe_src = open(C.SCRIPTS / "tfidf_recipe.py", encoding="utf-8").read()
     assert "norm=" not in recipe_src and "penalty=" not in recipe_src and "OneVsRestClassifier(base" in recipe_src
     tfidf_rows = [
-        ["Training rows", f"~{m07['SUBSET_SIZE']:,}, stratified"],
-        ["Minimum rows per class", f"{m07['DOWNSAMPLE_MIN']:,}, or all if fewer"],
-        ["Seeds", f"{min(m07['SEEDS'])}–{max(m07['SEEDS'])}, one downsample each"],
+        ["Training observations", f"~{m07['SUBSET_SIZE']:,}, stratified"],
+        ["Minimum observations per LOINC code", f"{m07['DOWNSAMPLE_MIN']:,}, or all if fewer"],
+        ["Model seeds", f"{min(m07['SEEDS'])}–{max(m07['SEEDS'])}, one downsample each"],
         ["Stop words", "none"],
         ["Largest n-gram", str(P["ngram_max"])],
-        ["Minimum document frequency", str(P["min_df"])],
-        ["Maximum document frequency", str(P["max_df"])],
+        ["Minimum document frequency", f'{P["min_df"]} observations'],      # a count
+        ["Maximum document frequency", f'{P["max_df"]:.0%} of observations'],  # a share
         ["Vocabulary size", "no cap"],
         ["Sublinear term frequency", "no"],
         ["Vector norm", "L2"],
         ["Classifier", "one-vs-rest logistic regression"],
-        ["Classes", str(n_classes)],
+        ["LOINC codes", str(n_classes)],
         ["Solver", P["solver"]],
         ["Penalty", "L2"],
         ["Inverse regularization strength C", f"{P['C']:.4f}"],
@@ -183,7 +183,7 @@ def values():
          f"{c13['GPU_BATCH_SIZE']} × 2 GPUs = 16", f"{c14['GPU_BATCH_SIZE']} × 2 GPUs × {16 // (2 * c14['GPU_BATCH_SIZE'])} accumulation = 16"],
         ["Precision and memory", "bf16; FlashAttention 2; FSDP gradient sharding", "bf16; FlashAttention 2; gradient checkpointing",
          "4-bit NF4 weights; bf16; FlashAttention 2; gradient checkpointing"],
-        ["Seeds", "0–4", "0–4", "0"],
+        ["Model seeds", "0–4", "0–4", "0"],
     ]
     _table("D.3", ["Setting", "FHIR-MLM", "BCM", "Llama"], deep_rows)
 
@@ -197,7 +197,8 @@ def values():
     _has(C.ANALYSIS / "lib" / "dumps.py", "binomtest(x, x + y, 0.5)")
     _has(C.ANALYSIS / "lib" / "power.py", "power: float = 0.80, alpha: float = 0.05")
     c23 = _consts(C.SCRIPTS / "23_sliding_dataset.py")
-    _has(C.SCRIPTS / "23_sliding_dataset.py", "NON-OVERLAPPING windows", "Patient + most-recent Encounter prepended")
+    _has(C.SCRIPTS / "23_sliding_dataset.py", "non-overlapping windows of whole resources",
+         "Encounter are prepended to each window")
     n_val = sum(1 for l in open(C.RERUN / "data" / "splits" / "val_patients.txt") if l.strip())
 
     tune = json.load(open(C.RESULTS / "08_tfidf_optuna_b0" / "tfidf_tune_v3.json"))

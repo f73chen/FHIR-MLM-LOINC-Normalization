@@ -33,7 +33,7 @@ _T = importlib.util.spec_from_file_location("v3_tables", HERE / "v3_tables.py")
 T = importlib.util.module_from_spec(_T); _T.loader.exec_module(T)
 
 import matplotlib.pyplot as plt  # noqa: E402
-from matplotlib.ticker import FuncFormatter  # noqa: E402
+from matplotlib.ticker import FixedLocator, FuncFormatter, NullLocator  # noqa: E402
 
 PLAIN = FuncFormatter(lambda v, _: f"{v:g}".replace("-", "−"))
 
@@ -41,6 +41,9 @@ FIGS: dict = {}
 DEEP3 = T.DEEP3
 GREY_REF = dict(color="0.45", lw=0.6, ls=(0, (4, 2)))
 BAND = dict(color="0.85", lw=0)
+#: the paraphrase condition's panel label in F-12, F-05, F-06 and F-26, the same name the thesis uses for it in
+#: captions and text
+PARA = "Para"
 #: one look per model wherever several share an axis: marker and line style, black or grey, so the
 #: figures read in print and without colour (a legend names them)
 SERIES = {"FHIR-MLM": dict(color="black", ls="-", marker="o", mfc="black"),
@@ -83,7 +86,7 @@ def panel_label(ax, text):
 
 
 # -- calibration and selective prediction (F-05, F-06) -----------------------
-CONDS = [("para_xsite", "Paraphrase"), ("nodesc_xsite", "NoDesc")]
+CONDS = [("para_xsite", PARA), ("nodesc_xsite", "NoDesc")]
 
 
 def _conf_axis(ax, lo_err, hi_err):
@@ -149,6 +152,12 @@ def _risk_legend(fig, present):
                borderaxespad=0.0)
 
 
+#: F-06's error axis is linear below 0.001% (a fraction of 1e-5) and logarithmic above, with a tick at 0 and at
+#: each decade
+F06_LINTHRESH = 1e-5
+F06_TICKS = [0, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
+
+
 @figure("F-06", [("calibration", "risk_coverage_curves.csv")], T.ALL4)
 def f06(S):
     """Selective prediction at the observation unit. The most confident predictions are accepted first, and
@@ -156,9 +165,10 @@ def f06(S):
     set). The panels show paraphrase and RELMA names, as F-26 does per code. Each line is the median over
     seeds at each coverage, like the bold line in F-26, without the seed lines (Llama has one seed). Dashed
     lines mark the 0.1% and 1% budgets of T-22. Error is on a log axis because the errors of the deep models
-    stay below 0.1% until nearly every observation is accepted."""
+    stay below 0.1% until nearly every observation is accepted. The axis is linear from 0 to 0.001% and
+    logarithmic above (symlog), so that an error of exactly 0 sits on a tick labelled 0."""
     r = S["risk_coverage_curves.csv"]
-    conds = [(c, lab) for c, lab in (("para_xsite", "Paraphrase"), ("relma_a0", "RELMA")) if (r.condition == c).any()]
+    conds = [(c, lab) for c, lab in (("para_xsite", PARA), ("relma_a0", "RELMA")) if (r.condition == c).any()]
     fig, axes = plt.subplots(1, len(conds), figsize=(FS.TEXTWIDTH, 2.2), squeeze=False, sharey=True)
     present = set()
     for k, (ax, (c, lab)) in enumerate(zip(axes[0], conds)):
@@ -168,11 +178,14 @@ def f06(S):
             grid = seeds[0].coverage.to_numpy()          # every seed's curve has the same thinned coverages
             risk = np.median([np.interp(grid, q.coverage, q.risk) for q in seeds], axis=0)
             st = SERIES[m]
-            ax.plot(grid, np.clip(risk, 1e-5, None), color=st["color"], ls=st["ls"], lw=RISK_LW, label=m, zorder=3)
+            ax.plot(grid, risk, color=st["color"], ls=st["ls"], lw=RISK_LW, label=m, zorder=3, clip_on=False)
             present.add(m)
         for budget in R.BUDGETS_OBS[:2]:                  # T-22's columns: 0.1% and 1%
             ax.axhline(budget, **GREY_REF)
-        ax.set_yscale("log"); ax.set_ylim(1e-5, 0.5); ax.set_xlim(0, 1)
+        ax.set_yscale("symlog", linthresh=F06_LINTHRESH, linscale=0.35)
+        ax.set_ylim(0, 0.5); ax.set_xlim(0, 1)
+        ax.yaxis.set_major_locator(FixedLocator(F06_TICKS))
+        ax.yaxis.set_minor_locator(NullLocator())
         ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{100 * v:g}"))
         ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{100 * v:g}"))
         panel_label(ax, f"({chr(97 + k)}) {lab}")
@@ -238,22 +251,30 @@ def f10b(S):
 
 
 # -- frequency and catalogue (F-02, F-12, F-26) ------------------------------
-@figure("F-02", [("observation", "obs_strata.csv")], T.ALL4)
+@figure("F-02", [("observation", "obs_strata.csv"), ("observation", "obs_strata_boot.csv")], T.ALL4)
 def f02(S):
-    """Top-1 by how often the true LOINC occurs in training (9 log bins), para, cell D, matched set. Each
-    point is the seed mean, with the Wilson 95% interval at that mean and the bin's n (observation sampling)."""
+    """Top-1 by how often the true LOINC occurs in training (9 log bins), para, cell D, the evaluated set.
+    Each point is the seed mean, with the 95% interval of that mean from the joint patient × seed bootstrap
+    (`v3_observation.strata_joint_rows`)."""
     s = S["obs_strata.csv"]
     s = s[(s.set == "para_D") & (s.scheme == "log9")]
+    s = s.assign(stratum=s.stratum.astype(int))          # the column also holds T-04's group names, so it reads as text
+    bt = S["obs_strata_boot.csv"]
+    bt = bt[(bt.set == "para_D") & (bt.scheme == "log9")]
+    bt = bt.assign(stratum=bt.stratum.astype(int))
     models = [m for m in T.ALL4 if m in set(s.model)]
     meta = s.groupby("stratum")[["lo", "hi", "n_obs"]].first()
     x = np.sqrt(meta.lo * meta.hi).to_numpy()
     fig, ax = plt.subplots(figsize=(FS.TEXTWIDTH, 2.4))
     for k, m in enumerate(models):
         acc = s[s.model == m].groupby("stratum").acc.mean().reindex(meta.index).to_numpy()
-        ci = np.array([_wilson(a, n) for a, n in zip(acc, meta.n_obs)])
+        ci = bt[bt.model == m].set_index("stratum")[["boot_lo", "boot_hi"]].reindex(meta.index).to_numpy()
+        if np.isnan(ci).any():
+            raise AssertionError(f"F-02: {m} has a bin without a bootstrap interval")
         xo = x * (1 + 0.07 * (k - (len(models) - 1) / 2))
         st = SERIES[m]
-        ax.errorbar(xo, acc, yerr=[acc - ci[:, 0], ci[:, 1] - acc], color=st["color"], ls=st["ls"], marker=st["marker"],
+        yerr = [np.maximum(acc - ci[:, 0], 0), np.maximum(ci[:, 1] - acc, 0)]
+        ax.errorbar(xo, acc, yerr=yerr, color=st["color"], ls=st["ls"], marker=st["marker"],
                     mfc=st["mfc"], mec=st["color"], ms=3.5, lw=0.9, elinewidth=0.6, capsize=0, label=m)
     ax.set_xscale("log")
     for b in (1_000, 100_000):                 # the frequency groups' boundaries: rare | common | frequent (T-11)
@@ -267,21 +288,12 @@ def f02(S):
     return fig, models
 
 
-def _wilson(p, n, z=1.96):
-    if n == 0:
-        return (np.nan, np.nan)
-    d = 1 + z * z / n
-    c = (p + z * z / (2 * n)) / d
-    h = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
-    return (max(0.0, c - h), min(1.0, c + h))
-
-
 @figure("F-12", [("catalogue", "catalogue_joint.csv")], T.ALL4)
 def f12(S):
     """Observation top-1 against catalogue top-1 for each model, per name condition, both units on the
     same rows (cell D, means over seeds). The bar is the joint code × seed 95% interval of the catalogue."""
     j = S["catalogue_joint.csv"]
-    fams = [(f, lab) for f, lab in (("para_D", "Paraphrase"), ("relma_a0_D", "RELMA")) if (j.arm == f).any()]
+    fams = [(f, lab) for f, lab in (("para_D", PARA), ("relma_a0_D", "RELMA")) if (j.arm == f).any()]
     pj = T.load("catalogue_per_model", "catalogue_joint.csv")
     if pj is not None and (pj.arm == "nodesc_D").any():
         j = pd.concat([j, pj[pj.arm == "nodesc_D"]]); fams.append(("nodesc_D", "NoDesc"))
@@ -295,7 +307,7 @@ def f12(S):
             ax.plot([0, 1], [r.obs_mean, r.top1_mean], ls="none", marker=st["marker"], mfc=st["mfc"], mec=st["color"], ms=4)
             ax.plot([1, 1], [r.top1_A_lo, r.top1_A_hi], color=st["color"], lw=0.8)
             present.add(m)
-        ax.set_xticks([0, 1]); ax.set_xticklabels(["Per observation", "Per code"]); ax.set_xlim(-0.3, 1.3)
+        ax.set_xticks([0, 1]); ax.set_xticklabels(["Per-observation", "Per-code"]); ax.set_xlim(-0.3, 1.3)
         ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{100 * v:g}"))
         panel_label(ax, f"({chr(97 + k)}) {lab}")
         if k == 0:
@@ -308,13 +320,19 @@ def f12(S):
     return fig, sorted(present)
 
 
+#: F-26's faint per-seed lines
+SEED_GREY, SEED_LW = "0.72", 0.5
+
+
 @figure("F-26", [("catalogue", "catalogue_joint.csv")], T.ALL4)
 def f26(S):
     """Catalogue risk-coverage. Codes are accepted most-confident first, and the error among those accepted
-    is plotted against the share of the catalogue accepted. Faint lines are single seeds and the bold line is
-    the median over seeds (cell D). Dashed lines mark the 1%, 5% and 10% budgets of T-24."""
+    is plotted against the share of the catalogue accepted. Faint lines are single seeds, each in its model's
+    line style so that it can be told to its model. The bold line is the median over seeds (cell D). A model
+    with one seed (Llama) has no faint line, and its one curve is the bold one. Dashed lines mark the 1%, 5%
+    and 10% budgets of T-24."""
     root = T.stamp_of("catalogue", "catalogue_joint.csv")["path"].parent
-    fams = [(f, lab) for f, lab in (("para_D", "Paraphrase"), ("relma_a0_D", "RELMA"))
+    fams = [(f, lab) for f, lab in (("para_D", PARA), ("relma_a0_D", "RELMA"))
             if (root / f"percode__{f}.parquet").exists()]
     fig, axes = plt.subplots(1, len(fams), figsize=(FS.TEXTWIDTH, 2.2), squeeze=False, sharey=True)
     grid = np.linspace(0.01, 1, 100)
@@ -322,16 +340,19 @@ def f26(S):
     for k, (ax, (fam, lab)) in enumerate(zip(axes[0], fams)):
         pc = pd.read_parquet(root / f"percode__{fam}.parquet", columns=["model", "seed", "sm_conf", "sm_correct"])
         for m in [m for m in T.ALL4 if m in set(pc.model)]:
+            st = SERIES[m]
             curves = []
-            for _, g in pc[pc.model == m].groupby("seed"):
+            groups = list(pc[pc.model == m].groupby("seed"))
+            for _, g in groups:
                 o = np.argsort(-g.sm_conf.to_numpy(), kind="stable")
                 wrong = ~g.sm_correct.to_numpy()[o].astype(bool)
                 cov = np.arange(1, len(o) + 1) / len(o)
                 risk = np.cumsum(wrong) / np.arange(1, len(o) + 1)
-                ax.plot(cov, risk, color="0.8", lw=0.5, zorder=1)
+                if len(groups) > 1:
+                    ax.plot(cov, risk, color=SEED_GREY, ls=st["ls"], lw=SEED_LW, zorder=1, gid=f"seed:{m}")
                 curves.append(np.interp(grid, cov, risk))
-            st = SERIES[m]
-            ax.plot(grid, np.median(curves, axis=0), color=st["color"], ls=st["ls"], lw=RISK_LW, label=m, zorder=3)
+            ax.plot(grid, np.median(curves, axis=0), color=st["color"], ls=st["ls"], lw=RISK_LW, label=m, zorder=3,
+                    gid=f"median:{m}")
             present.add(m)
         for b in R.BUDGETS_CODE:
             ax.axhline(b, **GREY_REF)
@@ -399,7 +420,7 @@ OUTCOMES = [("correct_pct", "Correct", "black"), ("valid_wrong_pct", "Real LOINC
 @figure("F-11", [("offshelf", "t28_rows.csv")], T.OFFSHELF)
 def f11(S):
     """(a) What each off-the-shelf model's answers were with perturbed numbers (as T-28). (b) The correct
-    share alone, both arms, with Wilson 95% intervals."""
+    share alone, both arms, with 95% intervals from a bootstrap over the sample's patients."""
     t = S["t28_rows.csv"]
     models = [m for m in T.OFFSHELF if m in set(t.model)]
     fig, (a, b) = plt.subplots(1, 2, figsize=(FS.TEXTWIDTH, 0.55 + 0.3 * len(models)),
@@ -411,7 +432,7 @@ def f11(S):
         a.barh(ys, p[col], left=left, height=0.55, color=shade, edgecolor="black", linewidth=0.4, label=lab)
         left += p[col].to_numpy()
     a.set_yticks(ys); a.set_yticklabels(models)
-    a.set_xlim(0, 100); a.set_xlabel("Share of answers (%)")
+    a.set_xlim(0, 100); a.set_xlabel("Share of outputs (%)")
     a.legend(ncol=2, loc="lower left", bbox_to_anchor=(0, 1.0), handlelength=1.0, columnspacing=1.0,
              borderaxespad=0.2)       # two rows: one row of four runs into panel (b)'s legend
     FS.finish(a); a.spines["left"].set_visible(False); a.tick_params(axis="y", length=0)

@@ -52,7 +52,7 @@ def build(write=True):
     for c in CODES:
         parts = []
         for a in AXES:
-            v = "–" if pd.isna(rows.loc[c, a]) else str(rows.loc[c, a])
+            v = "—" if pd.isna(rows.loc[c, a]) else str(rows.loc[c, a])
             parts.append(rf"{SHADE}\textbf{{{v}}}" if a in differs_on.get(c, []) else v)
         body.append([c] + parts)
     tex = BT.tex(HEADER, body, total=False, caption="Three LOINC codes and their six axes", label="tab:loinc-axes",

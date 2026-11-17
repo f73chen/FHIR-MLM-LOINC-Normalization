@@ -12,9 +12,10 @@ Where every number comes from (nothing that can be read or derived is typed in):
                     full-model (8,030,261,248) and base + head (7,511,574,103) counts, and both numbers
                     in the PEFT printout in results/14_llama_train/train_para_seed0.log.
     TF-IDF          679 one-vs-rest classifiers x (V vocabulary weights + 1 bias). V is read from the
-                    pipeline/07 summary (para_xsite clean, seed 0), but only if that summary records
-                    the current recipe. Otherwise the row reads "pending". The V IDF weights are
-                    not counted, because they are fitted statistics.
+                    pipeline/07 summary (para_xsite pert, seed 0, the model of the main comparison,
+                    which trains on perturbed numbers), but only if that summary records the current
+                    recipe. Otherwise the row reads "pending". The V IDF weights are not counted,
+                    because they are fitted statistics.
 
 The Llama total is not the PEFT "all params" count (7,560,166,574). That count is base + head plus all
 48,592,471 trainable parameters, which already include the head, so it counts the head twice. PEFT's
@@ -52,7 +53,7 @@ EVAL = locations.WORK / "eval"
 LLAMA_CONFIG = sorted(glob.glob(str(Path.home() / ".cache/huggingface/hub/models--meta-llama--Llama-3.1-8B-Instruct"
                                    / "snapshots/*/config.json")))
 PEFT_LOG = REPO / "results" / "14_llama_train" / "train_para_seed0.log"
-TFIDF_07 = REPO / "results" / "07_tfidf_train_eval" / "tfidf_para_xsite__clean.json"
+TFIDF_07 = REPO / "results" / "07_tfidf_train_eval" / "tfidf_para_xsite__pert.json"
 FIG = REPO / "results" / "analysis" / "a1" / "figures"
 TAB = REPO / "results" / "analysis" / "a1" / "tables"
 
@@ -88,7 +89,7 @@ def llama_counts():
 
 
 def tfidf_params():
-    """679 x (V + 1) for the para_xsite clean seed-0 model, or None when the 07 summary does not
+    """679 x (V + 1) for the para_xsite pert seed-0 model, or None when the 07 summary does not
     record the current recipe."""
     if not tfidf_recipe.records_current_recipe(TFIDF_07, "pinned_params"):
         return None, None
@@ -105,14 +106,14 @@ def build(write=True):
     tf, vocab = tfidf_params()
     pct = lambda t, n: f"{100 * t / n:.2f}"
     body = [
-        ["TF-IDF + LR", *((f"{tf:,}", f"{tf:,}", "100.00") if tf else ("pending",) * 3)],
+        ["TF-IDF + Logistic Regression", *((f"{tf:,}", f"{tf:,}", "100.00") if tf else ("pending",) * 3)],
         ["FHIR-MLM", f"{mlm:,}", f"{mlm:,}", "100.00"],
         ["BioClinical ModernBERT", f"{bcm:,}", f"{bcm:,}", "100.00"],
         ["Llama-3.1-8B (QLoRA)", f"{ll['total']:,}", f"{ll['trained']:,}", pct(ll["trained"], ll["total"])],
     ]
     for r in body:
         print("  " + " | ".join(r))
-    print(f"  TF-IDF vocabulary (para_xsite clean, seed 0): {vocab if vocab else 'not available'}")
+    print(f"  TF-IDF vocabulary (para_xsite pert, seed 0): {vocab if vocab else 'not available'}")
     print(f"  Llama: base + head {ll['base_plus_head']:,} + adapters {ll['adapters']:,} = {ll['total']:,}; "
           f"trained = adapters + head {ll['trained']:,}")
     if write:

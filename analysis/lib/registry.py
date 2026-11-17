@@ -1,5 +1,6 @@
 """What the results analyses (the v3_*.py scripts, thesis Chapters 6 and 7) run over: the models, their
 seeds and conditions, the headline cell, and where outputs go (results/analysis/v3/<analysis>/).
+With N8_EVALSET set, outputs go to results/analysis/v3_<set>/<analysis>/ instead (lib/evalset.py).
 
 The seeds of each model are declared here. A loader that falls back to whichever seed exists
 could report a single-seed model as a five-seed mean. A missing dump is therefore an error, unless
@@ -15,6 +16,7 @@ from __future__ import annotations
 import datetime as _dt
 import importlib.util
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -113,7 +115,10 @@ def require(models, seeds: tuple | None = None, logits: bool = False, **spec) ->
 
 
 # -- outputs -----------------------------------------------------------------
-OUT_ROOT = REPO / "results" / "analysis" / "v3"
+# With N8_EVALSET set (lib/evalset.py), the root takes the name of that set as a suffix. A run on the
+# evaluated set then writes to results/analysis/v3_both, beside the results on every scored observation.
+_EVSUF = f"_{os.environ['N8_EVALSET']}" if os.environ.get("N8_EVALSET") else ""
+OUT_ROOT = REPO / "results" / "analysis" / f"v3{_EVSUF}"
 
 
 def out_dir(analysis: str, cross_model: bool = True) -> Path:

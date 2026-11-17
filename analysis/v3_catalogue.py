@@ -57,6 +57,10 @@ KEY = ["patient_uuid", "obs_ordinal"]
 LETTERS = {"A": ("clean", "clean"), "B": ("clean", "pert"), "C": ("pert", "clean"), "D": ("pert", "pert")}
 
 
+#: RQ3 scenarios that test the same trained models. In LETTERS, A and B are clean-trained, C and D perturb-trained
+RQ3_SAME_RUNS = (("A", "B"), ("C", "D"))
+
+
 # -- one cell -> one per-code table ------------------------------------------
 def _hits(scores, gold, space, k):
     """The per-code hit of a8.topk_from_scores. It uses the same sort (argsort, default kind), so ties
@@ -89,6 +93,7 @@ def percode_table(cell, space, keep_keys=None, pick_seed=0) -> pd.DataFrame:
 # -- observation sets --------------------------------------------------------
 def keyset(cell, covered_only=False) -> set:
     f = pd.read_parquet(cell.path / "part-0000.parquet", columns=KEY + ["true_loinc"])
+    f = D._evalset().restrict(cell, f)                    # does nothing unless N8_EVALSET is set
     if covered_only:
         f = f[D.relma_covered(cell, f)]
     return set(zip(f.patient_uuid.to_numpy(), f.obs_ordinal.to_numpy()))
@@ -262,14 +267,22 @@ def joint_rows(pc: pd.DataFrame, arm: str) -> tuple[list[dict], list[dict]]:
     return rows, cov_rows
 
 
-def pairwise_rows(pc: pd.DataFrame, arm: str, names: list | None = None) -> list[dict]:
+def pairwise_rows(pc: pd.DataFrame, arm: str, names: list | None = None, same_runs=()) -> list[dict]:
     """Paired differences for one arm. Each replicate uses one shared code draw across every pair and
     resamples each model's seeds independently. The interval is on the difference. `names` defaults to
     the registry models in ORDER, then any other arm (e.g. the single-observation FHIR-MLM). Extra arms
-    come last so the random draws of the four models do not depend on them."""
+    come last so the random draws of the four models do not depend on them.
+
+    `same_runs` lists pairs of names whose seed s is the same trained model. RQ3's scenarios A and B are
+    the clean-trained models tested on clean and on perturbed numbers, and C and D are the perturb-trained
+    ones. For such a pair one seed pick per replicate serves both names. The difference is then taken
+    within each trained model, so the spread of the accuracy between seeds cancels, while the spread of
+    the difference between seeds stays in the interval. The random draws do not depend on `same_runs`, so
+    the intervals of the other pairs do not change. Such a pair must have the same seed labels, since
+    seed s of one name is set against seed s of the other."""
     if names is None:
         names = [m for m in ORDER if m in set(pc.model)] + sorted(set(pc.model) - set(ORDER))
-    mats, seeds_n, codes_ref = {}, {}, None
+    mats, seeds_n, seed_ids, codes_ref = {}, {}, {}, None
     for m in names:
         s = pc[pc.model == m]
         if s.empty:
@@ -279,20 +292,26 @@ def pairwise_rows(pc: pd.DataFrame, arm: str, names: list | None = None) -> list
             codes_ref = piv.index
         elif not piv.index.equals(codes_ref):
             raise AssertionError(f"{arm}/{m}: code index differs from the first model's; cannot pair")
-        mats[m], seeds_n[m] = piv.to_numpy(dtype=float), piv.shape[1]
+        mats[m], seeds_n[m], seed_ids[m] = piv.to_numpy(dtype=float), piv.shape[1], list(piv.columns)
     names = [m for m in names if m in mats]
     rng = np.random.default_rng(A10.BOOT_SEED)
     nc = len(codes_ref)
     draws = rng.integers(0, nc, size=(A10.N_BOOT, nc))
     seed_pick = {m: rng.integers(0, seeds_n[m], size=(A10.N_BOOT, seeds_n[m])) for m in names}
-    per = {m: np.take_along_axis(mats[m][draws].mean(axis=1), seed_pick[m], axis=1).mean(axis=1) for m in names}
+    by_seed = {m: mats[m][draws].mean(axis=1) for m in names}                  # replicates × seeds
+    per = {m: np.take_along_axis(by_seed[m], seed_pick[m], axis=1).mean(axis=1) for m in names}
+    same = {frozenset(p) for p in same_runs}
     rows = []
     for i, a in enumerate(names):
         for b in names[i + 1:]:
-            lo, hi = np.percentile(per[a] - per[b], [2.5, 97.5])
+            paired = frozenset((a, b)) in same
+            if paired and seed_ids[a] != seed_ids[b]:
+                raise AssertionError(f"{arm}: {a} and {b} are given as the same runs but have seeds {seed_ids[a]} and {seed_ids[b]}")
+            pb = np.take_along_axis(by_seed[b], seed_pick[a], axis=1).mean(axis=1) if paired else per[b]
+            lo, hi = np.percentile(per[a] - pb, [2.5, 97.5])
             rows.append({"arm": arm, "model_a": a, "model_b": b, "diff_mean": mats[a].mean() - mats[b].mean(),
                          "lo": lo, "hi": hi, "excludes_zero": bool(lo > 0 or hi < 0),
-                         "seeds_a": seeds_n[a], "seeds_b": seeds_n[b]})
+                         "seeds_a": seeds_n[a], "seeds_b": seeds_n[b], "seeds_paired": paired})
     return rows
 
 
@@ -316,8 +335,58 @@ FINAL_FAMILIES = ("para_D_mlm_tfidf", "nodesc_D", "nodesc_D_t15", "so_para__mlm"
                   f"so_relma_a{R.RELMA_PRIMARY}__mlm")
 
 
+#: groups of local codes by their number of test observations, as (name, lowest, highest)
+NOBS_GROUPS = (("all", 1, None), ("1", 1, 1), ("2+", 2, None), ("2-9", 2, 9), ("10-99", 10, 99),
+               ("100-999", 100, 999), ("1000+", 1000, None))
+N_FLOOR, FLOOR_SEED = 500, 0                    # simulations per model seed for the per-code ECE floor
+
+
+def nobs_rows(pc: pd.DataFrame, arm: str) -> list[dict]:
+    """Per-code confidence against per-code accuracy by a local code's number of test observations. This
+    shows whether the per-code miscalibration is only lower accuracy. On a local code with one test
+    observation the per-code result is the per-observation result. On the others the summed probabilities
+    decide the code, while its confidence stays the winner's share of the sum, an average over the
+    observations. One row per model, seed and group. `obs_right` is the mean share of a code's observations
+    that are right (unweighted over codes). `gap_part` is the group's part of the arm's confidence minus
+    accuracy, so the parts of "1" and "2+" add up to the row "all"."""
+    rows = []
+    has_obs = "n_correct_obs" in pc.columns
+    for (model, seed), s in pc.groupby(["model", "seed"], sort=True):
+        s = s.sort_values("code")
+        corr, conf = s.correct.to_numpy(dtype=float), s.conf.to_numpy(dtype=float)
+        nobs = s.n_obs.to_numpy(dtype=float)
+        share = s.n_correct_obs.to_numpy(dtype=float) / nobs if has_obs else np.full(len(s), np.nan)
+        for name, lo, hi in NOBS_GROUPS:
+            k = (nobs >= lo) & (nobs <= (np.inf if hi is None else hi))
+            if not k.any():
+                continue
+            rows.append({"arm": arm, "model": model, "seed": int(seed), "test_obs": name, "n_codes": int(k.sum()),
+                         "n_obs": int(nobs[k].sum()), "acc": corr[k].mean(), "conf": conf[k].mean(),
+                         "conf_minus_acc": conf[k].mean() - corr[k].mean(), "obs_right": share[k].mean(),
+                         "gap_part": (conf[k] - corr[k]).sum() / len(s)})
+    return rows
+
+
+def ece_floor_rows(pc: pd.DataFrame, arm: str, n_sim: int = N_FLOOR, seed: int = FLOOR_SEED) -> list[dict]:
+    """The per-code ECE that sampling alone gives. For each model and seed, the ECE of a model that is
+    calibrated by construction with the same per-code confidences (each local code right with a probability
+    equal to its confidence), over `n_sim` simulations, beside the observed ECE. Per-code ECE is computed on
+    a few hundred local codes, so it is above 0 even for a calibrated model. The simulations use their own
+    random generator, so the draws of the other statistics do not move."""
+    rng = np.random.default_rng(seed)
+    rows = []
+    for (model, sd), s in pc.groupby(["model", "seed"], sort=True):
+        s = s.sort_values("code")
+        conf, corr = s.conf.to_numpy(dtype=float), s.correct.to_numpy(dtype=float).astype(bool)
+        sims = np.array([A10.C.ece(conf, rng.random(len(conf)) < conf, n_bins=A10.N_BINS) for _ in range(n_sim)])
+        rows.append({"arm": arm, "model": model, "seed": int(sd), "n_codes": len(s),
+                     "ece": A10.C.ece(conf, corr, n_bins=A10.N_BINS), "floor_mean": float(sims.mean()),
+                     "floor_p95": float(np.percentile(sims, 95)), "n_sim": n_sim})
+    return rows
+
+
 def _family_stats(fams, root: Path):
-    joint, cov, pw, pw5, rules, keys = [], [], [], [], [], set()
+    joint, cov, pw, pw5, rules, nobs, floor, keys = [], [], [], [], [], [], [], set()
     for fam in fams:
         p = root / f"percode__{fam}.parquet"
         if not p.exists():
@@ -329,11 +398,14 @@ def _family_stats(fams, root: Path):
         # top-1 draws above are unchanged
         pw5 += pairwise_rows(pc.assign(correct=pc.top5), fam)
         rules += rule_rows(pc, fam)
+        nobs += nobs_rows(pc, fam)                       # where the per-code calibration gap sits
+        floor += ece_floor_rows(pc, fam)
         keys |= set(pc.model_key)
         print(f"  ✓ {fam:18s} {pc.model.nunique()} arm(s), {pc.code.nunique()} codes, "
               f"{int(pc.n_obs_set.iloc[0]):,} observations", flush=True)
     for name, rows in (("catalogue_joint", joint), ("catalogue_coverage_by_seed", cov),
-                       ("catalogue_pairwise", pw), ("catalogue_pairwise_top5", pw5), ("catalogue_rules", rules)):
+                       ("catalogue_pairwise", pw), ("catalogue_pairwise_top5", pw5), ("catalogue_rules", rules),
+                       ("catalogue_calibration_by_nobs", nobs), ("catalogue_ece_floor", floor)):
         pd.DataFrame(rows).to_csv(root / f"{name}.csv", index=False)
     return keys
 
@@ -350,7 +422,9 @@ def stage_tables(out_cross: Path, out_model: Path) -> tuple[list, list]:
         cells = pc.assign(model=pc.cell)
         j, _ = joint_rows(cells, fam)
         cj += [{"family": fam, "model": model, "cell": r.pop("model"), **r} for r in j]
-        cp += [{"family": fam, "model": model, **r} for r in pairwise_rows(cells, fam, names=sorted(set(pc.cell)))]
+        # A and B are one set of trained models and C and D the other, so their differences pair the seeds
+        cp += [{"family": fam, "model": model, **r}
+               for r in pairwise_rows(cells, fam, names=sorted(set(pc.cell)), same_runs=RQ3_SAME_RUNS)]
         mm.add(key)
         print(f"  ✓ {fam:28s} cells {''.join(sorted(set(pc.cell)))}, {pc.code.nunique()} codes", flush=True)
     pd.DataFrame(cj).to_csv(out_model / "catalogue_rq3_cells.csv", index=False)

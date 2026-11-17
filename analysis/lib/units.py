@@ -89,8 +89,9 @@ class UnitTable:
     def commensurable(self, a: str, b: str) -> bool:
         """Same physical dimension and same mole exponent.
 
-        The mole exponent keeps mass and molar apart. mg/dL has moleExp 0 and mmol/L has 1, and both
-        have dimension (-3,0,...) once mass is folded in. So dimension alone is not enough."""
+        The mole exponent keeps molar units and count units apart. UCUM treats the mole as a plain number,
+        so mmol/L (moleExp 1) and 10*3/uL (moleExp 0) have the same dimension, (-3,0,...). So dimension
+        alone is not enough. A mass unit such as mg/dL already differs in dimension."""
         if a not in self.mag or b not in self.mag:
             return False
         return self.dim.get(a) == self.dim.get(b) and self.mole.get(a) == self.mole.get(b)

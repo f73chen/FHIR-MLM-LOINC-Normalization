@@ -45,7 +45,8 @@ _UNSUP = str.maketrans("⁻⁰¹²³⁴⁵⁶⁷⁸⁹", "-0123456789")
 _MATH = re.compile(r"(\$[^$]*\$)")
 _TEX = [("{", r"\{"), ("}", r"\}"), ("#", r"\#"), ("_", r"\_"), ("&", r"\&"),       # reserved first,
         ("~", r"$\sim$"),                      # "~2,000,000" means about, but LaTeX reads a bare ~ as a space
-        ("†", r"$^{\dagger}$"), ("‡", r"$^{\ddagger}$"), ("÷", r"$\div$")]          # then the symbols
+        ("†", r"$^{\dagger}$"), ("‡", r"$^{\ddagger}$"), ("÷", r"$\div$"),          # then the symbols
+        ("e.g. ", r"e.g.\ ")]                 # a word space after "e.g.", not LaTeX's sentence space (Table C.2's prompts)
 _OPEN1 = re.compile(r"(?<![^\s(\[])'")      # a single quote that opens: at the start, or after a space or (
 _POW = re.compile(r"10([⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+)")
 _MANT = re.compile(r"(\d+(?:\.\d+)?) × 10([⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+)")     # 2 × 10⁻⁴ as one span, never split
@@ -246,7 +247,7 @@ def table_b4(ctx):
 def table_b5(ctx):
     header, rows, right = _from(B, "B.5")
     assert header[1:] == ["Value CV (%)", "From", "Codes", "Range variation (%)", "From", "Codes", "Capped"]
-    head = ["Group", "%", "From", "Codes", "%", "From", "Codes", "Capped"]
+    head = ["Code group", "%", "From", "Codes", "%", "From", "Codes", "Capped"]
     return {
         "name": "B5_group_defaults", "header": head, "body": rows, "right": right,
         "groups": [("Value CV default", 1, 3), ("Range variation default", 4, 7)],

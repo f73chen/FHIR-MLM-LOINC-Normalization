@@ -75,7 +75,7 @@ def obs_table_cell(cell) -> pd.DataFrame:
         from lib import codes as K
         df = K.attach(df)
     df["row"] = np.arange(len(df))
-    return df
+    return D._evalset().restrict(cell, df)        # only the evaluated set when N8_EVALSET is on. `row` keeps the dump's index
 
 
 def aggregate_cell(cell, space: np.ndarray, keep_keys: set | None = None, limit: int | None = None,

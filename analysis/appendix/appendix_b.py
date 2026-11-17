@@ -210,7 +210,7 @@ def values():
         cls, prop = split(g)
         top = sorted(rs, key=lambda r: (-int(r["n_obs"]), r["name"]))[0]
         grows.append([f"{cls}, {prop}", len(rs), top["loinc"], top["name"]])   # code with its name (LOINC licence §10.3)
-    _table("B.4", ["Group", "Codes", "LOINC", "Long common name"], grows, "lrll")
+    _table("B.4", ["Code group", "Codes", "LOINC", "Long common name"], grows, "lrll")
     pg = defaultdict(list)
     for p, grp in a25.PROP_GROUP.items():
         pg[grp].append(p)
@@ -247,7 +247,7 @@ def values():
         drows.append([f"{cls}, {prop}",
                       *([_pct1(vd[0]), _cap(SHORT[vd[1]]), len(cv)] if cv else ["—", "", ""]),
                       *([_pct1(rd[0]), _cap(SHORT[rd[1]]), len(cr), capped] if cr else ["—", "", "", ""])])
-    _table("B.5", ["Group", "Value CV (%)", "From", "Codes", "Range variation (%)", "From",
+    _table("B.5", ["Code group", "Value CV (%)", "From", "Codes", "Range variation (%)", "From",
                                     "Codes", "Capped"], drows, "lrlrrlrr")
     n_fb_v = sum(r["value_tier"] == "fallback" for r in spec)
     n_fb_r = sum(r["range_tier"] == "fallback" for r in spec)
@@ -297,7 +297,7 @@ def values():
     assert set(sc) == set(rule)
     srows = [[label[k], len(sc[k]), C.pct(obs([r["loinc"] for r in sc[k]]), n_num).rstrip("%"), rule[k]]
              for k in sorted(sc, key=lambda k: -len(sc[k]))]
-    _table("B.7", ["Scale", "Codes", "Obs. (%)", "Rule"], srows, "lrrl")
+    _table("B.7", ["Scale", "Codes", "Observations (%)", "Rule"], srows, "lrrl")
     special = [r["loinc"] for k in ("log", "ratio_near_1", "ladder") for r in sc[k]]
     n_step = sum(r["magnitude_kind"] == "rung" for k in ("log", "ratio_near_1", "ladder") for r in sc[k])
 
@@ -335,7 +335,6 @@ def values():
     tot_train, neg = _negatives()
     assert tot_train == n_num
     defect_neg = [r for r in defect if neg.get(r["loinc"])]
-    clamp100 = [r for r in spec if r["clamp_0_100"] == "1"]
     derived = [r for r in spec if r["derived_role"]]
     assert sorted({r["derived_role"] for r in derived}) == ["MCH", "MCHC", "MCV"]
     panel = [r for r in spec if r["fraction_panel"] == "1"]
@@ -349,6 +348,10 @@ def values():
         assert frag in src_p, frag
     by_rule = [r for r in spec if r["tier0_no_perturb"] != "1" and r["magnitude_kind"] in numeric_kinds]
     nonneg = [r for r in by_rule if r["allow_negative"] != "1"]
+    # the row counts the codes the rule acts on, like the two rows beside it. A flagged code that is never
+    # perturbed or that moves by rung is left out, because the rule never reaches it.
+    clamp100 = [r for r in by_rule if r["clamp_0_100"] == "1"]
+    assert len(clamp100) == 115 and sum(r["clamp_0_100"] == "1" for r in spec) == 119
     rungs = [r for r in spec if r["tier0_no_perturb"] != "1" and r["magnitude_kind"] == "rung"]
     n_ = lambda rs: C.num(len(rs))                                              # noqa: E731
     sh = lambda codes: C.pct(obs(codes), n_num).rstrip("%")                     # noqa: E731
@@ -362,7 +365,7 @@ def values():
         ["Scale-specific rules (Table B.7)", C.num(len(scale)), sh(scale)],
         ["Keep original precision", n_(by_rule), sh([r["loinc"] for r in by_rule])],
     ]
-    _table("B.8", ["Guard", "Codes", "Obs. (%)"], grows2, "lrr")
+    _table("B.8", ["Guard", "Codes", "Observations (%)"], grows2, "lrr")
 
     v = {
         "n_records": C.num(len(recs)),

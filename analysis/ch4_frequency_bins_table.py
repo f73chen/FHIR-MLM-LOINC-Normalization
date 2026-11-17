@@ -58,7 +58,7 @@ def cells(rows, tot):
 
 
 GROUPS = [("LOINC codes", 2, 3), ("Training observations", 4, 5), ("Test observations", 6, 7)]
-HEADER = ["Bin", "Training occurrences", "$n$", "%", "$n$", "%", "$n$", "%"]
+HEADER = ["Frequency group", "Training occurrences", "$n$", "%", "$n$", "%", "$n$", "%"]
 RIGHT = {2, 3, 4, 5, 6, 7}  # numeric columns, right-aligned
 
 

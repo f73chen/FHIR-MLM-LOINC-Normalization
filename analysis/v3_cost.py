@@ -25,8 +25,8 @@ Units and caveats:
     hyperparameter search (pipeline/08) is reported separately.
   * Parameters: T-25 reuses the counts of T-08 (ch5_model_sizes_table.py), so the thesis gives each
     model one size. Llama's eval manifest counts 4-bit packed weights, and T-08 derives base + head +
-    LoRA adapters. TF-IDF's count is taken from T-08 (clean arm, seed 0). The pert model's vocabulary is
-    larger, so its count is recorded beside the benchmark.
+    LoRA adapters. TF-IDF's count is taken from T-08 (pert arm, seed 0), the arm the timings use. The
+    clean-trained model is smaller.
 
 Writes aggregate CSVs to results/analysis/v3/cost/.
 

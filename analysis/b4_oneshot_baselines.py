@@ -285,6 +285,9 @@ def run_model(key, limit=None, write=False, zero_shot=False, batch_size=1,
         for a0 in range(0, len(sample), batch_size):
             chunk = sample[a0:a0 + batch_size]
             texts = [render(r) for r in chunk]
+            # A chat template already writes a beginning-of-sequence token and the tokenizer adds another, so
+            # the prompts of the three chat-template models begin with two. The tokenizer of OpenBioLLM-8B adds
+            # none to its plain-text prompt. The reported runs were made with this encoding.
             enc = tok(texts, return_tensors="pt", padding=True, truncation=True,
                       max_length=2048).to(model.device)
             with torch.no_grad():

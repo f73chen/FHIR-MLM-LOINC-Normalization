@@ -38,14 +38,14 @@ FIG = HERE.parent / "results" / "analysis" / "a1" / "figures"
 TAB = HERE.parent / "results" / "analysis" / "a1" / "tables"
 
 #: (row label, tier) in evidence order. The tier "" means never perturbed.
-TIERS = [("Measurement naming the analyte", "observed"),
+TIERS = [("Observed variation naming the analyte", "observed"),
          ("Specification naming the analyte", "specification"),
          ("Derived from a CLIA limit", "derived"),
-         ("Analyte group default", "class"),
+         ("Code group default", "class"),
          ("Global median", "fallback"),
          ("Not perturbed", "")]
 GROUPS = [("Values", 1, 2), ("Reference ranges", 3, 4)]
-HEADER = ["Evidence source", "Codes", "Obs. (%)", "Codes", "Obs. (%)"]
+HEADER = ["Evidence source", "Codes", "Observations (%)", "Codes", "Observations (%)"]     # spelled out beside the "Observed variation" row
 RIGHT = {1, 2, 3, 4}
 
 
@@ -82,7 +82,7 @@ def cells(out, n, TV, TR):
     body = []
     for label, t in TIERS:
         nv, ov, nr, orr = out[t]
-        rng = ("–", "–") if t == "specification" else (f"{nr:,}", share(orr, TR))
+        rng = ("—", "—") if t == "specification" else (f"{nr:,}", share(orr, TR))
         body.append([label, f"{nv:,}", share(ov, TV), *rng])
     body.append(["Total", f"{n:,}", "100.0", f"{n:,}", "100.0"])
     return body

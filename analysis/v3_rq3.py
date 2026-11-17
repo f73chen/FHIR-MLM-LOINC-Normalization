@@ -184,11 +184,12 @@ def stage_obs(out: Path) -> list[str]:
                 frames, n_all, top1_all = {}, {}, {}
                 for L in fam["letters"]:
                     c = cell_for(m, s, fam, L)
-                    f = D.top1_frame(c)
+                    f = D.top1_frame(c, evaluated=False)    # the manifest check compares the whole dump
                     n_all[L], top1_all[L] = len(f), float(f.correct.mean())
                     man = manifest_top1(c)              # on all positions, the scope of the manifest
                     if abs(top1_all[L] - man) > TOL_MANIFEST:
                         raise AssertionError(f"manifest check: {c.name} dump top-1 {top1_all[L]:.9f} != manifest {man:.9f}")
+                    f = D._evalset().restrict(c, f)      # the evaluated set when N8_EVALSET is on
                     if fam["evalset"].startswith("relma_"):
                         f = f[D.relma_covered(c, f)]    # only observations shown a RELMA name count
                     frames[L] = f[KEY + ["correct"]]
@@ -325,19 +326,20 @@ REPLICATES = tuple(f"pert_r{i}" for i in range(1, 6))
 def _variant_top1(m, arm, seed, variant):
     """Observation top-1 of `arm`'s model on a perturbed variant of the test data. FHIR-MLM's value comes
     from its dump (cross-checked against the manifest). TF-IDF's comes from 07, which scored every variant
-    itself."""
-    if m == "tfidf":
+    itself. Under N8_EVALSET, TF-IDF's value is also read from its dumps (the variant dumps of 16), so that
+    its rows are on the evaluated set."""
+    if m == "tfidf" and not D._evalset().active():
         return tfidf07("para_xsite", arm, seed, variant)
     c = R.cell(m, seed, condition="para_xsite", train_arm=arm, test_arm=variant)
-    v = float(D.top1_frame(c).correct.mean())
+    whole = float(D.top1_frame(c, evaluated=False).correct.mean())
     man = manifest_top1(c)
-    if abs(v - man) > TOL_MANIFEST:
-        raise AssertionError(f"manifest check: {c.name} dump {v:.9f} != manifest {man:.9f}")
-    return v
+    if abs(whole - man) > TOL_MANIFEST:
+        raise AssertionError(f"manifest check: {c.name} dump {whole:.9f} != manifest {man:.9f}")
+    return float(D.top1_frame(c).correct.mean())
 
 
 def _cell_top1(m, arm, seed, letter_test):
-    if m == "tfidf":
+    if m == "tfidf" and not D._evalset().active():
         return tfidf07("para_xsite", arm, seed, None if arm == letter_test else letter_test)
     c = R.cell(m, seed, condition="para_xsite", train_arm=arm, test_arm=letter_test)
     return float(D.top1_frame(c).correct.mean())
@@ -348,8 +350,10 @@ EXTRA = ("bcm", "llama")      # their secondary blocks are used where their eval
 
 def _block_ready(m, variants, seeds) -> bool:
     """Every (arm, seed, variant) eval of one block exists. TF-IDF scored every variant itself (07)."""
-    return m == "tfidf" or all(R.has(R.cell(m, s, condition="para_xsite", train_arm=a, test_arm=v))
-                               for a in ("clean", "pert") for s in seeds for v in variants)
+    if m == "tfidf" and not D._evalset().active():
+        return True
+    return all(R.has(R.cell(m, s, condition="para_xsite", train_arm=a, test_arm=v))
+               for a in ("clean", "pert") for s in seeds for v in variants)
 
 
 def _row_top1(m, arm, seed, tests: dict) -> dict:

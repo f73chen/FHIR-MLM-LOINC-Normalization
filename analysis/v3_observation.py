@@ -6,7 +6,9 @@ frequency), T-15's observation columns, and T-17 (thesis Chapter 6).
   --stage headline    T-10: observation top-1 and top-5 at cell D on the cross-model matched set,
                       patient-clustered CI, McNemar pairs (exact, and with patients as clusters) with the
                       MDE that has patients as clusters. Nodesc too
-  --stage strata      T-11 (T-04's three groups) and F-02 (nine log-spaced bins), Wilson intervals
+  --stage strata      T-11 (T-04's three groups) and F-02 (nine log-spaced bins). Per seed with Wilson
+                      intervals (obs_strata.csv), and for F-02's bars the joint patient × seed bootstrap
+                      interval of each bin's seed mean (obs_strata_boot.csv)
   --stage conditions  T-15 (para vs nodesc) and T-17 (RELMA vs para, each model on its own matched rows),
                       with every denominator
   --stage all         all three
@@ -48,6 +50,7 @@ KEY = ["patient_uuid", "obs_ordinal"]
 STRATA_EDGES = A1.STRATA_EDGES                                  # nine log-spaced bins (F-02)
 GROUPS = (("rare", 0, 1_000), ("common", 1_000, 100_000), ("frequent", 100_000, 10**9))   # T-04's three groups
 N_BOOT = 300                                                    # patient-clustered bootstrap resamples
+N_BOOT_JOINT, BOOT_SEED = 2000, 0                               # as in v3_singleobs.joint_ci (F-02's bars)
 A1_OUT = HERE.parent / "results" / "analysis" / "a1"                # a1_train_counts.py writes the counts here
 
 
@@ -155,6 +158,45 @@ def strata_rows(f, tc: dict, **ids) -> list[dict]:
     return out
 
 
+def strata_joint_rows(frames: list, tc: dict, n_boot=N_BOOT_JOINT, seed=BOOT_SEED, **ids) -> list[dict]:
+    """The bars of F-02. For each log-spaced bin, the 95% percentile interval of the seed-mean accuracy from
+    the joint patient × seed bootstrap of v3_singleobs.joint_ci. `frames` holds one model's per-seed frames
+    on identical rows. Each replicate draws the set's patients once (the nine bins share the draw) and then
+    resamples the seeds (a model with one seed resamples patients only). A replicate that leaves a bin
+    without observations has no accuracy there and is left out of that bin's percentiles (`n_empty`)."""
+    base = frames[0]
+    for g in frames[1:]:
+        if not ((g[KEY].to_numpy() == base[KEY].to_numpy()).all() and (g.true_loinc.to_numpy() == base.true_loinc.to_numpy()).all()):
+            raise AssertionError(f"{ids}: the seeds' frames do not cover identical rows")
+    edges = np.array(STRATA_EDGES)
+    nb = len(edges) - 1
+    b = np.digitize(base.true_loinc.map(tc).fillna(0).to_numpy(), edges[1:-1], right=False)
+    pc, pats = pd.factorize(base.patient_uuid.to_numpy())
+    n_pat, n_seeds = len(pats), len(frames)
+    N = np.bincount(pc * nb + b, minlength=n_pat * nb).reshape(n_pat, nb).astype(float)          # patients × bins
+    C = np.stack([np.bincount(pc * nb + b, weights=g.correct.to_numpy().astype(float), minlength=n_pat * nb)
+                  .reshape(n_pat, nb) for g in frames], axis=2)                                   # patients × bins × seeds
+    rng = np.random.default_rng(seed)
+    acc = np.full((n_boot, nb), np.nan)
+    for r in range(n_boot):
+        w = np.bincount(rng.integers(0, n_pat, n_pat), minlength=n_pat).astype(float)
+        pick = rng.integers(0, n_seeds, n_seeds)
+        n = w @ N
+        ok = n > 0
+        acc[r, ok] = (np.einsum("p,pbs->bs", w, C)[ok][:, pick] / n[ok, None]).mean(axis=1)
+    rows = []
+    for k in range(nb):
+        if N[:, k].sum() == 0:
+            continue
+        v = acc[:, k][~np.isnan(acc[:, k])]
+        lo, hi = np.percentile(v, [2.5, 97.5])
+        rows.append({**ids, "scheme": "log9", "stratum": k, "lo": int(edges[k]), "hi": int(edges[k + 1]),
+                     "n_obs": int(N[:, k].sum()), "n_patients": int((N[:, k] > 0).sum()), "n_seeds": n_seeds,
+                     "acc_mean": float((C[:, k, :].sum(axis=0) / N[:, k].sum()).mean()),
+                     "boot_lo": float(lo), "boot_hi": float(hi), "n_boot": n_boot, "n_empty": int(n_boot - len(v))})
+    return rows
+
+
 def stage_strata(out: Path) -> list[str]:
     tc = train_count_map()
     models = [m for m in R.CONDITIONS["para_xsite"] if all(R.has(cellD(m, s)) for s in R.SEEDS[m])]
@@ -162,13 +204,20 @@ def stage_strata(out: Path) -> list[str]:
     keys = None
     for f in f0.values():
         keys = mi(f) if keys is None else keys.intersection(mi(f))
-    rows = []
+    rows, boot = [], []
     for m in models:
+        fs = []
         for s in R.SEEDS[m]:
             f = on(f0[m] if s == R.SEEDS[m][0] else frame(cellD(m, s)), keys)
             rows += strata_rows(f, tc, set="para_D", model=R.LABEL[m], seed=s, n_set=len(keys))
+            fs.append(f)
+        boot += strata_joint_rows(fs, tc, set="para_D", model=R.LABEL[m], n_set=len(keys))
     t = pd.DataFrame(rows)
     t.to_csv(out / "obs_strata.csv", index=False)
+    bt = pd.DataFrame(boot)
+    bt.to_csv(out / "obs_strata_boot.csv", index=False)
+    print(bt.pivot_table(index="stratum", columns="model", values="boot_hi").sub(
+        bt.pivot_table(index="stratum", columns="model", values="boot_lo")).to_string(float_format=lambda v: f"{v:.4f}"))
     s0 = t[(t.scheme == "t04") & (t.seed == 0)]
     print(s0.pivot_table(index="stratum", columns="model", values="acc").to_string(float_format=lambda v: f"{v:.4f}"))
     print("  smallest log9 stratum:", int(t[(t.scheme == "log9") & (t.seed == 0)].groupby("stratum").n_obs.first().min()),

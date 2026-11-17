@@ -21,17 +21,18 @@ import locations  # noqa: E402
 RELEASE = locations.REPO
 HF = Path.home() / ".cache" / "huggingface" / "hub"
 UP = locations.UPSTREAM
+MIMIC_CODE = locations.MIMIC_CODE     # the local clone of the public MIT-LCP/mimic-code repository
 MONTH = "%-d %B %Y"
 
 
 #: the models in Table F.2 (name, role, Hugging Face ID). D.3 and E.1 refer to it for the IDs and revisions.
 MODELS = [
     ("BioClinical ModernBERT [Sounack 2025]", "Fine-tuned (BCM)", "thomas-sounack/BioClinical-ModernBERT-large"),
-    ("Llama-3.1-8B-Instruct [Grattafiori 2024]", "Fine-tuned; off-the-shelf baseline; paraphrase cleaner", "meta-llama/Llama-3.1-8B-Instruct"),
-    ("MedGemma-4B [Sellergren 2025]", "Paraphrase generation; off-the-shelf baseline", "google/medgemma-4b-it"),
-    ("Gemma-3-12B [Gemma3 2025]", "Off-the-shelf baseline", "google/gemma-3-12b-it"),
-    ("OpenBioLLM-8B [OpenBioLLM-8B 2024]", "Off-the-shelf baseline", "aaditya/Llama3-OpenBioLLM-8B"),
-    ("Meditron-7B [Meditron 2023]", "Off-the-shelf baseline", "epfl-llm/meditron-7b"),
+    ("Llama-3.1-8B-Instruct [Grattafiori 2024]", "Fine-tuned; off-the-shelf model; paraphrase cleaner", "meta-llama/Llama-3.1-8B-Instruct"),
+    ("MedGemma-4B [Sellergren 2025]", "Paraphrase generation; off-the-shelf model", "google/medgemma-4b-it"),
+    ("Gemma-3-12B [Gemma3 2025]", "Off-the-shelf model", "google/gemma-3-12b-it"),
+    ("OpenBioLLM-8B [OpenBioLLM-8B 2024]", "Off-the-shelf model", "aaditya/Llama3-OpenBioLLM-8B"),
+    ("Meditron-7B [Meditron 2023]", "Off-the-shelf model", "epfl-llm/meditron-7b"),
 ]
 #: each table as the appendix prints it: key -> (header, rows, align). tables.py draws the PNG and .tex from here.
 TABLES = {}
@@ -43,6 +44,14 @@ def _table(key, header, rows, align=""):
 
 def _date(p):
     return datetime.date.fromtimestamp(os.path.getmtime(p)).strftime(MONTH)
+
+
+def _clone_date(repo):
+    """The day a local git clone was made: the first entry of its HEAD log (metadata only, no file content)."""
+    first = open(repo / ".git" / "logs" / "HEAD", encoding="utf-8").readline()
+    m = re.search(r"> (\d+) [+-]\d{4}\t", first)
+    assert m and "clone: from" in first, first[-80:]
+    return datetime.date.fromtimestamp(int(m.group(1))).strftime(MONTH)
 
 
 def _snapshot(repo):
@@ -78,13 +87,19 @@ def values():
     data_rows = [
         ["MIMIC-IV [MIMIC-IV v2.2] [Johnson 2023]", "2.2", "PhysioNet, credentialed"],
         ["MIMIC-IV on FHIR [MIMIC-IV on FHIR v1.0] [Bennett 2023]", "1.0", "PhysioNet, credentialed"],
-        ["MIMIC-IV LOINC map", _date(UP / "mimic_loinc.csv"), "GitHub, public"],
+        # the map's date is the day the mimic-code repository was cloned. mimic_loinc.csv is derived from the map
+        # and has a later date. The row cites the map's bibliography entry.
+        ["MIMIC-IV LOINC map [mimic-code LOINC map, 2023]", _clone_date(MIMIC_CODE), "GitHub, public"],
         ["LOINC [LOINC Users' Guide, 2026]", "2.82", "Regenstrief, LOINC licence"],
         ["RELMA Community Mappings [Vreeman 2015]", f"RELMA 7.14, {_date(UP / 'relma_custom_codes.csv')}", "Regenstrief, no redistribution"],
         ["UMLS Metathesaurus [Bodenreider 2004]", "2025AB", "UMLS licence"],
         ["OHDSI Athena vocabularies", _date(athena / "CONCEPT.csv"), "OHDSI"],
         ["CDISC terminology and LOINC map", f"{cdisc_days[0].day} and {cdisc_days[1].strftime(MONTH)}", "CDISC"],
         ["PCORnet value set", "1.14", "PCORnet"],
+        # the two other sources of the unit alias table and of Table A.1's factors. 15 April 2026 is the date of the
+        # copy of ucum-lhc's data/ucum.csv. lab2clean 2.0.0 is the CRAN release the factors were derived from.
+        ["ucum-lhc unit table [ucum-lhc, 2026]", "15 April 2026", "GitHub, public"],
+        ["lab2clean UCUM units [Zayed 2026]", "2.0.0", "CRAN, public"],
     ]
     _table("F.1", ["Source", "Version or date", "Access"], data_rows)
 

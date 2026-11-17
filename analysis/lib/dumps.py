@@ -69,13 +69,19 @@ def load_dump(model: str, condition: str, seed: int, evalset_tag: str, topk: int
     return load_dir(run_dir(model, condition, seed, evalset_tag), model, topk)
 
 
-def load_cell(cell, topk: int = 10) -> pd.DataFrame:
-    """load_dump for a v3 (or any) `lib.cells.Cell`."""
-    return load_dir(cell.path, cell.model, topk)
+def load_cell(cell, topk: int = 10, evaluated: bool = True) -> pd.DataFrame:
+    """load_dump for a v3 (or any) `lib.cells.Cell`. With `evaluated`, the rows are restricted to the
+    evaluated set when N8_EVALSET is on (lib/evalset.py)."""
+    df = load_dir(cell.path, cell.model, topk)
+    return _evalset().restrict(cell, df).reset_index(drop=True) if evaluated else df
 
 
-def top1_frame(cell, extra: tuple = ()) -> pd.DataFrame:
+def top1_frame(cell, extra: tuple = (), evaluated: bool = True) -> pd.DataFrame:
     """Returns DataFrame[patient_uuid, obs_ordinal, true_loinc, pred_loinc, correct, *extra] for a Cell.
+
+    With `evaluated` and N8_EVALSET on, the rows are restricted to the evaluated set (lib/evalset.py). A
+    check that compares a dump with its own manifest passes evaluated=False. With the switch off the
+    argument changes nothing.
 
     This is the fast path for top-1 only. It reads the top-k list column with pyarrow and takes its
     first element, where `load_dir` stacks millions of Python lists. `correct` has the same definition
@@ -102,26 +108,34 @@ def top1_frame(cell, extra: tuple = ()) -> pd.DataFrame:
                         "true_loinc": true, "pred_loinc": pred, "correct": pred == true})
     for c in extra:
         out[c] = t[c].to_numpy(zero_copy_only=False)
+    if evaluated:
+        out = _evalset().restrict(cell, out).reset_index(drop=True)
     return out
 
 
-def topk_hits(cell, k: int = 5) -> np.ndarray:
+def topk_hits(cell, k: int = 5, evaluated: bool = True) -> np.ndarray:
     """Per-row top-k hit under the mapping-first rule: any of the top-k predictions maps to the gold
-    LOINC. Same row order as top1_frame. With k=1 it reproduces its `correct`."""
+    LOINC. Same row order as top1_frame called with the same `evaluated`. With k=1 it reproduces its
+    `correct`."""
     import pyarrow.compute as pc
     import pyarrow.parquet as pq
     f = cell.path / "part-0000.parquet"
+    keycols = KEY if evaluated else []
     if cell.model == "tfidf":
-        t = pq.read_table(f, columns=["true_loinc", "topk_idx"])
+        t = pq.read_table(f, columns=keycols + ["true_loinc", "topk_idx"])
         space = np.array(json.loads((cell.path / "manifest.json").read_text())["label_space_679"], dtype=object)
         idx = np.stack(pc.list_slice(t["topk_idx"], 0, k).to_numpy(zero_copy_only=False))
         pred, true = space[idx], t["true_loinc"].to_numpy(zero_copy_only=False).astype(object)
     else:
-        t = pq.read_table(f, columns=["true_class", "topk_class"])
+        t = pq.read_table(f, columns=keycols + ["true_class", "topk_class"])
         arr = class_to_loinc_array()
         idx = np.stack(pc.list_slice(t["topk_class"], 0, k).to_numpy(zero_copy_only=False))
         pred, true = arr[idx], arr[t["true_class"].to_numpy()]
-    return (pred == true[:, None]).any(axis=1)
+    hits = (pred == true[:, None]).any(axis=1)
+    if evaluated:
+        hits = hits[_evalset().mask(cell, t["patient_uuid"].to_numpy(zero_copy_only=False),
+                                    t["obs_ordinal"].to_numpy())]
+    return hits
 
 
 def relma_covered(cell, frame: pd.DataFrame) -> np.ndarray:
@@ -141,10 +155,12 @@ def relma_covered(cell, frame: pd.DataFrame) -> np.ndarray:
         raise ValueError(f"{cell.name} is not a RELMA cell")
     if cell.model == "tfidf":
         d = pd.read_parquet(cell.path / "part-0000.parquet", columns=["desc_shown"])
-        cov = d.desc_shown.notna().to_numpy()
-        if len(cov) != len(frame) or not cov.all():
+        if not d.desc_shown.notna().all():
             raise AssertionError(f"{cell.name}: expected every TF-IDF RELMA row to carry a RELMA name")
-        return cov
+        # every row of the dump has a RELMA name; `frame` is that dump or, with N8_EVALSET on, a subset of its rows
+        if len(frame) > len(d) or (len(frame) != len(d) and not _evalset().applies(cell)):
+            raise AssertionError(f"{cell.name}: the frame does not come from this dump ({len(frame):,} vs {len(d):,} rows)")
+        return np.ones(len(frame), bool)
     if cell.v3:
         side = DATASET_BASE / f"{cell.model}__{cell.evalset}__{cell.condition}__{cell.test_arm_explicit}" / "assignment_sidecar.parquet"
     else:                                                  # v1: one dataset per (model, draw)
@@ -157,6 +173,21 @@ def relma_covered(cell, frame: pd.DataFrame) -> np.ndarray:
     if len(m) != len(frame):
         raise AssertionError("the sidecar join changed the row count")
     return m["_cov"].eq(True).to_numpy()                   # NaN (no sidecar row) counts as not covered
+
+
+def _evalset():
+    """lib/evalset.py, loaded once whichever way `lib` was imported. It does nothing unless N8_EVALSET is set."""
+    try:
+        from lib import evalset as EV
+        return EV
+    except ImportError:
+        key = "n8_lib_evalset"
+        if key not in sys.modules:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location(key, Path(__file__).resolve().parent / "evalset.py")
+            sys.modules[key] = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(sys.modules[key])
+        return sys.modules[key]
 
 
 def load_dir(d: Path, model: str, topk: int = 10) -> pd.DataFrame:
@@ -315,7 +346,8 @@ def mcnemar(a: pd.DataFrame, b: pd.DataFrame) -> dict:
 def mcnemar_patients(a: pd.DataFrame, b: pd.DataFrame) -> dict:
     """McNemar's test with patients as clusters (Durkalski et al. 2003) on matched arms. D_k is patient k's
     (a right, b wrong) count minus its (a wrong, b right) count. Then z = sum(D_k) / sqrt(sum(D_k^2)), with a
-    two-sided normal p. With one observation per patient, z^2 is McNemar's chi-square without continuity
+    two-sided normal p. This is the unweighted form, which Durkalski et al. give as Obuchowski's. Their own
+    statistic divides each D_k by the number of observations of patient k. With one observation per patient, z^2 is McNemar's chi-square without continuity
     correction. `mcnemar` treats observations as independent. This test does not, for the same reason that
     the observation-level intervals resample patients. Its MDE is power.mde_mcnemar_patients."""
     from scipy.stats import norm

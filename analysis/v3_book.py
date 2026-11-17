@@ -5,7 +5,8 @@ Generate the numbers book, results/analysis/v3/numbers.md (thesis Chapters 6 to 
 The book follows the order of the thesis. It first lists every Chapter 6 table with its denominator
 and seed basis, its rows and its sources. The rows come from the builders in v3_tables, which also
 write the .tex. Then come the in-text numbers that have no table, and then the numbers derived for
-Chapters 7 and 8. Do not edit numbers.md by hand. Re-run the script instead.
+Chapters 7 and 8. Do not edit numbers.md by hand. Re-run the script instead. With N8_EVALSET set
+(lib/evalset.py), the book is numbers_<set>.md in the same folder and states the evaluated set at the top.
 
   python analysis/v3_book.py
 """
@@ -14,6 +15,7 @@ from __future__ import annotations
 import datetime as dt
 import importlib.util
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -25,8 +27,12 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 _T = importlib.util.spec_from_file_location("v3_tables", HERE / "v3_tables.py")
 T = importlib.util.module_from_spec(_T); _T.loader.exec_module(T)
+_O = importlib.util.spec_from_file_location("v3_ownset", HERE / "v3_ownset.py")
+OWN = importlib.util.module_from_spec(_O); _O.loader.exec_module(OWN)      # §7.7's comparison of the two result roots
 
-BOOK = HERE.parent / "results" / "analysis" / "v3" / "numbers.md"
+# with N8_EVALSET set, the book takes the evaluated set's name (numbers_both.md) and sits beside numbers.md
+BOOK = HERE.parent / "results" / "analysis" / "v3" / (
+    f"numbers_{os.environ['N8_EVALSET']}.md" if os.environ.get("N8_EVALSET") else "numbers.md")
 SEEDS = "means over the declared seeds (5; Llama 1) with the sample sd"
 
 SECTIONS = [                       # Chapter 6's sections, each with its tables in the thesis's order
@@ -76,7 +82,9 @@ BASIS = {
     "T-14": "Para scenario-D matched set; deployed decisions; " + SEEDS + ".",
     "T-17": "Each model on its own paired RELMA/para rows (RELMA-named only), scenario D; " + SEEDS + ".",
     "T-20": "As T-19.",
-    "T-22": "As T-21; coverage = share auto-mapped at the error budget (0.1 / 1%; at 5%, every model covers 100%).",
+    "T-22": "Para as T-21; RELMA names (draw a0) on the RELMA evaluated set, as F-06's panel (b); coverage = "
+            "share auto-mapped at the error budget (0.1 / 1%; at 5%, every model covers 100%); the "
+            "range is the worst to best model seed at 0.1%; " + SEEDS + ".",
     "T-28": "4,952 test observations (500 patients), one observation per prompt, few-shot; perturbed numbers (clean "
             "vs perturbed: the §6.4 / §6.6.3 block below and F-11).",
     "T-45": "As T-41.",
@@ -89,6 +97,22 @@ BASIS = {
     "T-50": "FHIR-MLM vs each control on the rows they share, scenarios A and D; gap = top-1 on the stage-1 "
             "patients − the others; per-seed CIs.",
 }
+
+# With N8_EVALSET set, every test result uses one evaluated set. The bases that state set sizes say so.
+_EV = None
+if os.environ.get("N8_EVALSET"):
+    _spec = importlib.util.spec_from_file_location("evalset", HERE / "lib" / "evalset.py")
+    _evm = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(_evm)
+    _EV = json.loads(_evm.MANIFEST.read_text())
+    _MAIN = (f"the evaluated set ('{_EV['set']}': {_EV['main_observations']:,} observations of {_EV['main_patients']:,} "
+             f"patients, {_EV['main_local_codes']} local codes; stage-1 pretraining patients excluded)")
+    _REL = (f"the RELMA evaluated set ({_EV['relma_observations']:,} observations, {_EV['relma_local_codes']} local "
+            f"codes: the evaluated set's RELMA-named rows in every RELMA dataset)")
+    BASIS["T-10"] = (f"Scenario D on {_MAIN}; " + SEEDS + ". Per code and deployed: joint code × seed bootstrap "
+                     "(Llama: codes only).")
+    BASIS["T-32"] = (f"Scenario D on {_MAIN}. Per observation: joint patient × seed CIs; per code: joint code × seed, the "
+                     "difference paired.")
+    BASIS["T-16"] = f"RELMA a0 at scenario D on {_REL}; " + SEEDS + "."
 
 
 def md_table(header, body, groups=()):
@@ -157,7 +181,8 @@ def text_numbers() -> list[str]:
               "| names | pair | observations | difference (pp) | MDE (pp) | design effect | p |", "|---|---|---|---|---|---|---|"]
         L += [f"| {r.set.split('_')[0]} | {r.model_a} − {r.model_b} | {r.n:,} | {100 * r.delta_a_minus_b:+.3f} | "
               f"{100 * r.mde_80:.3f} | {r.design_effect:.1f} | {T.pval(r.p_patients)} |" for r in p.itertuples()]
-        L += ["", "- MDE and p: McNemar's test with patients as clusters (Durkalski et al. 2003), the MDE at 80% power "
+        L += ["", "- MDE and p: McNemar's test with patients as clusters (Durkalski et al. 2003, in the unweighted form that "
+              "they give as Obuchowski's), the MDE at 80% power "
               "and α = 0.05. The exact, independent-observations p and MDE stay in the file.", ""]
     r = _df("observation", "obs_relma_vs_para.csv")
     if r is not None:
@@ -332,6 +357,58 @@ def untabled() -> list[str]:
         rows.append(("7.1, 7.7", "FHIR-MLM: per-observation top-1 in scenario D (lowest–highest seed)",
                      f"its own rows scored in all four scenarios, {int(d.n_matched.iloc[0]):,} observations",
                      f"{100 * d.D.min():.2f}–{100 * d.D.max():.2f}% ({100 * (d.D.max() - d.D.min()):.2f} pp)"))
+    nb = _df("catalogue", "catalogue_calibration_by_nobs.csv")
+    if nb is not None:       # §6.5.1: where the per-code calibration gap sits
+        fine = ["2-9", "10-99", "100-999", "1000+"]
+        for arm, name in (("para_D", "Para"), ("relma_a0_D", "RELMA a0")):
+            g = nb[nb.arm == arm].groupby(["model", "test_obs"]).agg(gap=("conf_minus_acc", "mean"), n=("n_codes", "first"),
+                                                                     acc=("acc", "mean"), conf=("conf", "mean"),
+                                                                     part=("gap_part", "mean"))
+            ms = [m for m in T.ALL4 if (m, "1") in g.index]
+            if not ms:
+                continue
+            rows.append(("6.5", f"per-code confidence minus accuracy on the local codes with one test observation / with more, "
+                         f"{name} (+ = overconfident)",
+                         f"the 4-model matched set, {int(g.loc[(ms[0], '1'), 'n'])} / {int(g.loc[(ms[0], '2+'), 'n'])} local codes",
+                         "; ".join(f"{m} {100 * g.loc[(m, '1'), 'gap']:+.1f} / {100 * g.loc[(m, '2+'), 'gap']:+.1f} pp" for m in ms)))
+            if arm == "para_D":
+                rows.append(("6.5", "the same by test observations per local code: 2–9 / 10–99 / 100–999 / 1000+, Para",
+                             "the 4-model matched set, " + " / ".join(str(int(g.loc[(ms[0], b), "n"])) for b in fine)
+                             + " local codes",
+                             "; ".join(f"{m} " + " / ".join(f"{100 * g.loc[(m, b), 'gap']:+.1f}" for b in fine) + " pp"
+                                       for m in ms)))
+                every = ["1"] + fine
+                sizes = " / ".join(str(int(g.loc[(ms[0], b), "n"])) for b in every) + " local codes"
+                rows.append(("6.5", "per-code accuracy at the mean per-code confidence, by test observations per local code: "
+                             "1 / 2–9 / 10–99 / 100–999 / 1000+, Para", "the 4-model matched set, " + sizes,
+                             "; ".join(f"{m} " + " / ".join(f"{100 * g.loc[(m, b), 'acc']:.1f}" for b in every) + "% right at "
+                                       + " / ".join(f"{100 * g.loc[(m, b), 'conf']:.1f}" for b in every) + "%" for m in ms)))
+                rows.append(("6.5", "each group's part of the overall per-code confidence minus accuracy (the parts add up to "
+                             "T-30's Conf − acc): 1 / 2–9 / 10–99 / 100–999 / 1000+, Para", "the 4-model matched set, " + sizes,
+                             "; ".join(f"{m} " + " / ".join(f"{100 * g.loc[(m, b), 'part']:+.1f}" for b in every)
+                                       + f" pp (of {100 * g.loc[(m, 'all'), 'gap']:+.1f})" for m in ms)))
+    fl = _df("catalogue", "catalogue_ece_floor.csv")
+    if fl is not None:
+        d = fl[fl.arm == "para_D"]
+        g = d.groupby("model")[["ece", "floor_mean", "floor_p95"]].mean()
+        rows.append(("6.5", "per-code ECE of a model calibrated by construction with the same per-code confidences "
+                     f"({int(d.n_sim.iloc[0])} simulations per model seed: mean, 95th percentile) against T-30's observed ECE, Para",
+                     f"the 4-model matched set, {int(d.n_codes.iloc[0])} local codes",
+                     "; ".join(f"{m} {g.loc[m, 'floor_mean']:.3f}, {g.loc[m, 'floor_p95']:.3f} vs {g.loc[m, 'ece']:.3f}"
+                               for m in T.ALL4 if m in g.index)))
+    fq = _df("calibration", "calibration_by_frequency.csv")
+    if fq is not None:
+        order = ["rare", "common", "frequent"]
+        g = fq[fq.condition == "para_xsite"].groupby(["model", "group"]).agg(gap=("gap_conf_minus_acc", "mean"), n=("n", "first"))
+        ms = [m for m in T.ALL4 if (m, "rare") in g.index]
+        if ms:
+            rows.append(("6.5", "per-observation confidence minus accuracy at T = 1 by the training frequency of the true LOINC "
+                         "code: rare / common / frequent, Para",
+                         "the 4-model matched set, " + " / ".join(f"{int(g.loc[(ms[0], k), 'n']):,}" for k in order)
+                         + " observations",
+                         "; ".join(f"{m} " + " / ".join(f"{100 * g.loc[(m, k), 'gap']:+.2f}" for k in order) + " pp"
+                                   for m in ms)))
+    rows += OWN.rows()        # §7.7: each model's own observations against the evaluated set (reads both result roots)
     L = ["### Ch 6–8 numbers no table shows", "",
          "| § | what | observation set | value (mean; seed range) |", "|---|---|---|---|"]
     L += [f"| {a} | {b} | {s} | {v} |" for a, b, s, v in rows] + [""]
@@ -460,6 +537,11 @@ def main():
     L = ["# Numbers book", "",
          f"*Generated by `analysis/v3_book.py` on {dt.datetime.now():%Y-%m-%d %H:%M} at {git}. Do not edit by hand: "
          "re-run the script.*", ""]
+    if _EV:
+        L += [f"**Evaluated set:** every test result below uses {_MAIN}; RELMA tables use {_REL}. "
+              "Validation results, the sliding windows (T-26), the off-the-shelf sample (T-28) and cost (T-25) are "
+              "not restricted to this set. Basis lines that describe a table's own per-table observation set (for "
+              "example \"each model on its own positions\") are superseded by this set.", ""]
     for title, tids in SECTIONS:
         L += [f"## {title}", ""]
         for tid in tids:
